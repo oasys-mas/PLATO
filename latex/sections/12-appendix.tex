@@ -1,0 +1,1549 @@
+
+
+\section{Proofs}
+
+
+
+% \subsection{Statistics-permutation invariant proof}
+% The statistics $[\mu, \sigma^2, \min, \max]$ computed over agents are permutation-invariant.
+% \begin{proof}
+% Let $\pi$ be any permutation of $\{1, \ldots, |N^t|\}$. For rows $\{o_1, \ldots, o_{|N^t|}\}$ of $o^t_N$:
+% \begin{itemize}
+%     \item $\mu = \frac{1}{|N^t|}\sum_{i} o_i = \frac{1}{|N^t|}\sum_{i} o_{\pi(i)}$ (addition is commutative)
+%     \item $\sigma^2 = \frac{1}{|N^t|}\sum_{i} (o_i - \mu)^2 = \frac{1}{|N^t|}\sum_{i} (o_{\pi(i)} - \mu)^2$
+%     \item $\min_i o_i = \min_i o_{\pi(i)}$ (minimum over a set is order-independent)
+%     \item $\max_i o_i = \max_i o_{\pi(i)}$ (maximum over a set is order-independent)
+% \end{itemize}
+% Thus $d^t = [\mu, \sigma^2, \min, \max]$ is invariant to agent ordering.
+% \end{proof}
+
+
+
+\subsection{Well Defined PLATO}
+
+A precondition to learning a rational policy in openness is producing consistent actor queries from finite parameters conditioned on a countably infinite observation space. In other words, a well defined function. GNN actors, such as MOHITO \citep{anilmohito}, meet this inherently because graph convolution is permutation invariant to node ordering and produce observation specific action output from its hyperedges. Here we prove that PLATO also fulfills this requirement.
+
+To prove PLATO is a well defined function we will show the actor, $\pi$, and critic, $V$, have values for each state in this unbounded space,
+$$
+\begin{aligned}
+    & (1) \forall s \in \mathbf{S}, \exists\Delta A \subseteq \mathbf{A}: (s,\Delta A) \in \pi
+    \qquad (2) \forall s \in \mathbf{S} \exists v \in \mathbb{R}: (s,v) \in V,
+\end{aligned}
+$$
+and that they consistently produce only one finite action distribution and $v$ approximation for each state,
+$$
+\begin{aligned}
+    &(3) \forall s \in \mathbf{S}, \quad \forall \Delta A_1, \Delta A_2 \subseteq \mathbf{A}: (s,\Delta A_1), (s,\Delta A_2) \in \pi\\
+    &(4) \forall s \in \mathbf{S}, \quad \forall v_1,  v_2 \in \mathbb{R}: (s,v_1), (s,v_2) \in V.
+\end{aligned}
+$$
+
+
+% First we show that PLATO's pointer network actor stochastic policy's are well defined over the entire unbounded observation space we condition them on,
+
+% \begin{proposition}[Actor well-definedness under openness]\label{prop:welldefined}
+% For any $|N^t| \geq 1$ and $|X^t| \geq 0$, and for fixed parameters $\theta$, the PLATO actor $\pi_\theta(\cdot \mid o_i^t)$ is a well-defined categorical distribution over $|X^t|+1$ actions.
+% \end{proposition}
+
+\begin{proof}[Proof (1)]
+    \label{proof:definedpi}
+    Assume there exists a state, $\hat{s} \in \mathbf{S}$ where $\pi(\hat{s})\neq \Delta A \subseteq \mathbf{A}$. It must then be true that either $\pi(\hat{s})$
+ is undefined, in other words $\hat{s} \notin \pi$, or $\pi(\hat{s})$ must have support over an action not in $\mathbf{A}$.
+ 
+    PLATO's actor preprocessor factors agent observations $o_i^t \to (o_N^t, o_X^t)$ of shapes $(|N^t| \times f_N,|X_i^t|\times f_X)$.  Where $X^t_i$ here refers to tasks agent $i$ can act on; $X_i^t\subseteq X^t$. We assume this factorization is given by the environment and defined over $\Psi_\Omega$. Regarding agent observations, team statistics produce $d^t \in \mathbb{R}^{4f_N}$, a \emph{fixed}-length vector regardless of $|N^t|$. The subsequent MLP is defined over $\mathbb{R}^{4f_n}$. On the task observations, the task encoding applies individually to tasks and is thus defined over $\mathbb{R}^{f_x}$, and produces keys, $K^t \in \mathbb{R}^{(|X^t|+1)f_h}$. Each score $u_x^t = \mathbf{v}^\top\!\tanh(\mathbf{W}_K k_x^t + \mathbf{W}_q q^t)$ applies the same fixed-parameter function regardless of $|X^t_i|$ or $|N^t|$. Because the only input constraints come from $\Psi_\Omega$, and $\Psi_\Omega$  is defined over all possible task and agent sets, $s\in \pi \iff s \in \mathbf{S}$. It must be the case that $\hat{s} \in \pi$.
+
+There exists one score $u_x^t \forall X_i^t \in M^t$ and one NO-OP score. PLATO assumes that there exists one action per task, $a_X \forall X_i$. There are also additional task-agnostic actions $A_*$, here a NO-OP action.  If the environment's action space is defined as, $\Psi_A(...) = \prod_{i}\{a_x  | x \in X_i, X_i\subseteq X\} + \{a_{NOOP}\}$, then any task score set must only include $a_x \forall X_i$ and NO-OP by definition. It must be the case that $\pi(\hat{s})\subseteq A$. Thus, by contradiction  $\forall s \in \mathbf{S}, \exists\Delta A \subseteq \mathbf{A}: (s,\Delta A) \in \pi$. 
+\end{proof}
+
+
+\begin{proof}[Proof (2)]
+    \label{proof:definedq}
+    The global graph is a partition over the state, similar to the preprocessor's output, but encompassing all agents' local observations. If the factored agent, $\mathcal{N}$  and task nodes $\mathcal{X}$, have fixed feature dimensions, $f_\mathcal{N}, f_{\mathcal{X}}$, the critic's MLPs can encode them into a shared latent space, $\mathbb{R}^{f_h}$.  The subsequent layers are GCNs over these nodes which are defined for a fixed $f_h$, global mean pooling which has no spatial requirements, and a decoder MLP, $MLP_v: \mathbb{R}^{f_h}\to \mathbb{R}$. Thus, if tasks and agents can be factored into state feature representations of fixed length regardless of change in the overall task and agent sets then,  $\forall s \in \mathbf{S} \exists v \in \mathbb{R}: (s,v) \in V$.
+\end{proof}
+
+\begin{proof}[Proof (3)]
+    \label{proof:mappingpi}
+        Let $\sigma(o_i^t)$ represent a permutation of task and agent observations given by the environment. The preprocessor is not assumed to be permutation invariant, in that \textbf{only the} order of factors may change by the order of input observations. The agent encoder is permutation invariant because the team statistics are comprised of permutation invariant operations, (mean, variance, minimum, maximum). The task encoder operates on all $o_x^t \in o_X^t$ independently and like the preprocessor persists ordering, but $K^t$'s values are unaffected by the order. The pointer decoder does not use a positional embedding, and more specifically,
+$$
+\mathbf{v}^\top\!\tanh(\mathbf{W}_K \sigma(k_x^t) + \mathbf{W}_q q^t) = \mathbf{v}^\top\!\tanh(\mathbf{W}_K k_x^t + \mathbf{W}_q q^t) \quad \forall \sigma, x.
+    $$
+    Therefore,  $\pi$ is permutation invariant, $\pi_\theta(\cdot \mid o_i^t) = \pi_\theta(\cdot \mid \sigma(o_i^t))$.  Because there are no stochastic operations in $\pi$ and we've established permutation invariance,  
+$$
+    \forall s \in \mathbf{S}, \quad \forall \Delta A_1, \Delta A_2 \subseteq \mathbf{A}: (s,\Delta A_1), (s,\Delta A_2) \in \pi.
+$$
+\end{proof}
+
+\begin{proof}[Proof (4)]
+    \label{proof:mappingq}
+    Let $\sigma(\mathcal{G})$ represent a reordering of nodes describing the state given by the environment. Critic encoders, $MLP_x$ and $MLP_v$ , encode nodes independently and are thus permutation invariant to node ordering. GCN message passing only produce a different output graph if the input graph is different. By definition graph vertices are a set. Permuting their order does not change the graph. Because none of the remaining operations are stochastic and we have shown the critic is permutation invariant,  $\forall s \in \mathbf{S}, \quad \forall v_1,  v_2 \in \mathbb{R}: (s,v_1), (s,v_2) \in V.$
+\end{proof}
+ 
+
+% \begin{proof}
+% \label{prop:welldefined}
+% The preprocessor maps $o_i^t$ to $(o_N^t, o_X^t)$ of shapes $(|N^t| \times f_N,\, |X^t| \times f_X)$, valid for any non-negative cardinalities. Team statistics produce $d^t \in \mathbb{R}^{4f_N}$, a \emph{fixed}-length vector regardless of $|N^t|$; $\mathrm{MLP}_s : \mathbb{R}^{4f_N} \to \mathbb{R}^{f_h}$ therefore always receives the same-sized input. $\mathrm{MLP}_x : \mathbb{R}^{f_X} \to \mathbb{R}^{f_h}$ is applied independently to each task, and the persistent \textsc{no-op} key guarantees $|K^t| \geq 1$. Each score $u_x^t = \mathbf{v}^\top\!\tanh(\mathbf{W}_K k_x^t + \mathbf{W}_q q^t)$ applies the same fixed-parameter function regardless of $|X^t|$, and \textsc{Softmax} over $|X^t|+1 \geq 1$ logits always yields a valid distribution.
+% \end{proof}
+
+% Well-definedness alone is not sufficient under AO: if the actor's output depended on the arbitrary ordering of agents in $o_N^t$, the same physical team could produce different decisions. The next proposition rules this out.
+
+% \begin{proposition}[Permutation invariance under AO]\label{prop:ao}
+% $\pi_\theta(\cdot \mid o_i^t)$ is invariant to the ordering of agents in $o_N^t$: for any permutation $\sigma$, $\pi_\theta(\cdot \mid o_i^t) = \pi_\theta(\cdot \mid \sigma(o_i^t))$.
+% \end{proposition}
+
+% \begin{proof}
+% By Appendix~A.7, $d^t = [\mu, \sigma^2, \min, \max](o_N^t)$ is permutation-invariant. Since $q^t = \mathrm{MLP}_s(d^t)$ depends only on $d^t$, and $K^t$ is independent of agent ordering, all downstream computations are unaffected by any reordering of rows in $o_N^t$.
+% \end{proof}
+
+% Together, the two propositions above show that the actor adapts correctly to any team composition and any task set. The following proposition makes precise why no structural modification is ever required: all fixed dimensions in $\theta$ encode feature widths, not cardinality bounds, and task identity is always encoded in feature content rather than parameter indices.
+
+% \begin{proposition}[No hardcoded cardinality bounds]\label{prop:nobound}
+% The actor $\pi_\theta$ contains no parameter or configuration variable indexed by $|N^t|$ or $|X^t|$. Under task openness, the key set $K^{t'} = \{\mathrm{MLP}_x(o_x^{t'}) \mid x \in X^{t'}\} \cup \{k_{\textsc{no-op}}\}$ is constructed fresh from $X^{t'}$ without modifying $\theta$, and the actor can be deployed at any scale without padding or configuration change.
+% \end{proposition}
+
+% \begin{proof}
+% All fixed dimensions in $\theta$ are \emph{feature} widths ($f_N$, $f_X$, $f_h$), not \emph{count} dimensions. $\mathrm{MLP}_s$ input is always $\mathbb{R}^{4f_N}$; $\mathrm{MLP}_x$ input is always $\mathbb{R}^{f_X}$; $\mathbf{W}_K, \mathbf{W}_q \in \mathbb{R}^{f_h \times f_h}$ and $\mathbf{v} \in \mathbb{R}^{f_h}$ are count-independent. Task identity is encoded in the \emph{content} of $o_x^{t'}$, not in parameter indices; $K^{t'}$ contains exactly $|X^{t'}|+1$ elements and softmax normalizes over precisely those, so no padding is needed. By contrast, fixed-slot methods (e.g., DGN~\cite{dgn}, DICG~\cite{dicg}) allocate one output dimension per agent or task, requiring a predefined maximum and silent zero-padding at inference time.
+% \end{proof}
+
+% The critic processes the full global state $\mathrm{State}^t$ during centralized training and must satisfy the same guarantee, since the graph size $|N^t|+|X^t|$ varies across timesteps.
+
+% \begin{proposition}[GNN critic well-definedness]\label{prop:critic}
+% For any $|N^t| \geq 1$ and $|X^t| \geq 0$, and for fixed parameters $\phi$, the GNN critic $V_\phi(\mathrm{State}^t)$ is a well-defined scalar without hardcoded bounds on agent or task counts.
+% \end{proposition}
+
+% \begin{proof}
+% The node encoders $\mathrm{MLP}_\mathcal{N} : \mathbb{R}^{f_N} \to \mathbb{R}^{f_h}$ and $\mathrm{MLP}_\mathcal{X} : \mathbb{R}^{f_X} \to \mathbb{R}^{f_h}$ are applied independently to each node; their dimensions are fixed and accept any number of nodes. The bipartite graph $\mathcal{G}^t$ is constructed fresh at each timestep with $|N^t|+|X^t|$ nodes and $|N^t||X^t|$ edges, requiring no predefined maximum. Each GCN weight matrix $\mathbf{W}^{(l)} \in \mathbb{R}^{f_h \times f_h}$ is square and count-independent. Mean pooling aggregates all node embeddings into a single $f_h$-dimensional vector regardless of $|N^t|+|X^t|$; the value head $\phi_v : \mathbb{R}^{f_h} \to \mathbb{R}$ then has fixed dimensions. No element of $\phi$ is indexed by $|N^t|$ or $|X^t|$.
+% \end{proof}
+
+% \begin{corollary}[Zero-shot transfer]\label{cor:zeroshot}
+% Both $\pi_\theta$ and $V_\phi$ can be deployed on environments with agent and task counts unseen during training, without retraining, padding, or any configuration change.
+% \end{corollary}
+
+% This follows from Propositions~\ref{prop:welldefined}--\ref{prop:critic}: all selection and value estimation are driven by learned feature similarities, and no count bound is encoded in $\theta$ or $\phi$. We validate this empirically in Section~\ref{sub:generalizability}.
+
+\section{Reproducibility}
+
+Here we formally define the Wildfire environment. We also include all hyper parameters, our seeding approach, and hyperparameter tuning methodology. 
+
+
+\paragraph{Hyperparameter tuning.}
+We tune all methods with Optuna~\cite{akiba2019optuna} using a Tree-structured Parzen Estimator (TPE) sampler with a shared budget of 50 trials per method.
+Each trial trains for 2{,}000 episodes and is evaluated on 15 validation episodes; the trial objective is the mean validation return on the $3\times 3$ grid under S3, the most challenging setup.
+For each method, the search space is anchored to the default hyperparameters reported in its published codebase, with ranges that bracket those defaults on a log scale for learning rates and a linear scale for bounded scalars.
+Specifically, learning rates are searched over $[10^{-5},\,10^{-2}]$ (PLATO, DICG) or $[10^{-5},\,10^{-3}]$ (MOHITO) and $[10^{-4},\,10^{-2}]$ (DGN); hidden dimensions over $\{64, 128, 256\}$ (PLATO, DGN, DICG) or $\{32, 64, 128\}$ (MOHITO); batch sizes over $\{512, 1024, 2048, 4096\}$ (PLATO), $\{256, 512, 1024, 2048\}$ (DGN), $\{512, 1024, 2048\}$ (DICG), or $\{16, 32, 64, 128\}$ (MOHITO); and entropy coefficients, gradient clipping, and exploration schedules similarly bracketing each method's reported defaults.
+This ensures each baseline is given a fair and equal opportunity to find its best configuration in our environment, independently of its original domain.
+
+\paragraph{Seeding protocol.}
+We use a three-tier seeding protocol, following established reproducibility practice in deep RL~\cite{henderson2018deep} with respect to openness.
+The \textbf{global seed} (42) initializes all network parameters and algorithm-level randomness (PyTorch, NumPy, Python random) once per run.
+The \textbf{train seed} (300) resets the environment at the start of every training episode, so the policy is always trained from a consistent initial fire configuration; within-episode stochasticity---fire spread, random ignitions, and stochastic refills---still varies across episodes, exposing the policy to diverse dynamics under a fixed start.
+The \textbf{execution seed} jointly seeds both the environment and all random-number generators at the start of each evaluation episode, making every episode exactly reproducible from its seed alone; we assign $N{=}50$ distinct sequential seeds per checkpoint ($200, 201, \ldots, 249$).
+All three seed ranges are disjoint by construction, so the policy is never evaluated on conditions seen during training.
+Sharing the same execution seeds across all methods yields seed-matched episode-level observations, which controls for seed-induced variance and increases the sensitivity of the paired $t$-tests used for significance.
+
+
+\section{Additional Results}
+
+
+\subsection{Wildfire Suppression}
+\label{wildfire}
+
+We simulate \emph{task openness} and \emph{agent openness} using the domain of wildfire suppression.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figs/wildfire_1.png}
+  \caption{ \textsc{Wildfire} example ($3\times 3$). Fires (tasks $X_j$) ignite, spread, burn out, or are put out (i.e., extinguished) while agents ($N_i$) deplete suppressant or leave for repairs. Both sets evolve over time, creating an open multi-agent system.}
+  \label{fig:wildfire}
+\end{figure}
+Each firefighter, $N_i$, has a suppression range, a finite suppressant level, and equipment health. Agents cannot move between cells; they act only on fires within range. When agent $i$ depletes its suppressant, it exits to recharge suppressant or repair its equipment and may later return, introducing \emph{agent openness}. 
+
+
+\subsection{Setup Figures}\label{app:Setup_figures}
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{figs/2x3.png}
+\caption{Setups (S1--S3) on $2\times 3$ showing the initial suppressant level that each firefighter agent has and the fire size. Setup 2 is more challenging than Setup 1, because one of the fires is a larger fire. Setup 3 is more challenging than Setup 2 because of uneven initial suppressant levels of the three agents, making coordination more difficult.Setup 0 (not shown) uses the same initial conditions as Setup 1 but disables both task openness and agent openness, yielding a static, non-open setting.}
+
+\label{fig:setups_2x3}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{figs/3x3.png}
+\caption{Setups (S0--S3) on $3\times 3$ showing the suppressant level that each firefighter agent has and the fire size. Setup 2 is more challenging than Setup 1, because two of the fires are larger fires.  Setup 3 is more challenging than Setup 2 because of different initial suppressant levels of the three agents, making coordination more difficult.}
+\label{fig:setups_3x3}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{figs/4x4.png}
+\caption{Setups (S0--S3) on $4\times 4$ showing the suppressant level that each firefighter agent has and the fire size. Setup 2 is more challenging than Setup 1, because two of the fires are larger fires.  Setup 3 is more challenging than Setup 2 because of uneven initial suppressant levels of the six agents, making coordination more difficult.}
+\label{fig:setups_4x4}
+\end{figure}
+\clearpage
+\subsection{Setup Details and Openness Statistics}\label{app:A1}
+
+% -----------------------
+% Openness event frequency (15-step horizon)
+% -----------------------
+\begin{table} [h]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{l|c|c|c|c}
+\toprule
+ & \multicolumn{4}{c}{\textbf{Setup}} \\
+\cline{2-5}
+\textbf{Grid} & \multicolumn{1}{c|}{\textbf{S0}} & \multicolumn{1}{c|}{\textbf{S1}} & \multicolumn{1}{c|}{\textbf{S2}} & \multicolumn{1}{c}{\textbf{S3}} \\
+\midrule
+\multicolumn{5}{c}{\textbf{Zero-suppressant count (agents ran out of suppressant)}} \\
+\midrule
+$2\times 3$ & 0.00$\pm$0.00 & 8.62$\pm$4.60 & 10.94$\pm$6.24 & 16.73$\pm$8.50 \\
+$3\times 3$ & 0.00$\pm$0.00 & 8.37$\pm$4.74 & 14.19$\pm$6.18 & 16.08$\pm$7.11 \\
+$4\times 4$ & 0.00$\pm$0.00 & 9.22$\pm$7.89 & 14.76$\pm$11.86 & 21.03$\pm$14.23 \\
+\midrule
+\multicolumn{5}{c}{\textbf{New fires count}} \\
+\midrule
+$2\times 3$ & 0.00$\pm$0.00 & 1.97$\pm$2.27 & 4.52$\pm$2.87 & 3.98$\pm$2.12 \\
+$3\times 3$ & 0.00$\pm$0.00 & 0.51$\pm$0.89 & 5.63$\pm$3.11 & 4.32$\pm$2.64 \\
+$4\times 4$ & 0.00$\pm$0.00 & 4.62$\pm$0.87 & 9.88$\pm$4.36 & 6.69$\pm$1.83 \\
+\bottomrule
+\end{tabular}
+\caption{Openness Event Statistics: Execution openness event frequency within the fixed 15-step episode horizon, aggregated across all models (mean $\pm$ std). S0 is closed, hence no ignitions and no zero-suppressant events. In S1--S3, both task openness (new fires) and agent openness (zero-suppressant leading to exit/refill) occur frequently.}
+\label{tab:openness_events}
+\end{table}
+
+
+\begin{table} [h]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{l|c|c|c}
+\toprule
+ & $2\times 3$ & $3\times 3$ & $4\times 4$ \\
+\midrule
+Cells ($rc$)                 & 6  & 9  & 16 \\
+Agents ($|N_0|$)             & 3  & 3  & 6 \\
+Initial fires ($|X_0|$)      & 2  & 4  & 6 \\
+Init suppressant (S0--S2)& [2,2,2] & [2,2,2] & [2,2,2,2,2,2] \\
+Init suppressant (S3)   & [2,1,0] & [2,1,0] & [2,1,0,2,1,0] \\
+Fire types (S0--S1)      & $1\times 2$ & $1\times 4$ & $1\times 6$ \\
+Fire types (S2)         & $1\times 1,\,2\times 1$ & $1\times 2,\,2\times 2$ & $1\times 4,\,2\times 2$ \\
+Fire types (S3)         & $1\times 1,\,2\times 1$ & $1\times 2,\,2\times 2$ & $1\times 3,\,2\times 3$ \\
+\bottomrule
+\end{tabular}
+
+\caption{Configuration: Grid details across sizes.}
+\label{tab:grid_minimal}
+\end{table}
+
+
+\subsection{Configuration Tables}\label{app:configuration_tables}
+
+
+
+
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Setup} & \textbf{2$\times$3} & \textbf{3$\times$3} & \textbf{4$\times$4} \\
+\midrule
+0 &
+\begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 2 \\ Fire types: 1$\times$2\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 4 \\ Fire types: 1$\times$4\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 6 \\ Initial suppressant: [2,2,2,2,2,2] \\ Initial fires: 6 \\ Fire types: 1$\times$6\end{tabular} \\
+
+1 &
+\begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 2 \\ Fire types: 1$\times$2\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 4 \\ Fire types: 1$\times$4\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 6 \\ Initial suppressant: [2,2,2,2,2,2] \\ Initial fires: 6 \\ Fire types: 1$\times$6\end{tabular} \\
+
+2 &
+\begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 2 \\ Fire types: 1$\times$1, 2$\times$1\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,2,2] \\ Initial fires: 4 \\ Fire types: 1$\times$2, 2$\times$2\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 6 \\ Initial suppressant: [2,2,2,2,2,2] \\ Initial fires: 6 \\ Fire types: 1$\times$4, 2$\times$2\end{tabular} \\
+
+3 &
+\begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,1,0] \\ Initial fires: 2 \\ Fire types: 1$\times$1, 2$\times$1\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 3 \\ Initial suppressant: [2,1,0] \\ Initial fires: 4 \\ Fire types: 1$\times$2, 2$\times$2\end{tabular} & \begin{tabular}[c]{@{}l@{}}Agents: 6 \\ Initial suppressant: [2,1,0,2,1,0] \\ Initial fires: 6 \\ Fire types: 1$\times$3, 2$\times$3\end{tabular} \\
+\bottomrule
+\end{tabular}
+\caption{Configuration: Grid-specific instantiations for each setup, including the number of agents, initial suppressant levels, initial fires, and initial fire types.}
+
+\end{table*}
+
+
+
+
+\clearpage
+
+\subsection{Random Seeds}\label{app:random_seed}
+We use a two-tier seeding protocol that separates training, and execution.
+
+\textbf{Global initialization.} Network parameters and algorithm-level randomness are seeded once per run with global seed~42 (PyTorch, NumPy, Python random), ensuring reproducible network initialization.
+
+\textbf{Training.} Each training episode resets the environment to a fixed seed ($s_{\text{train}}=300$), so all training episodes share the same initial fire configuration and suppressant levels. Within-episode stochasticity---fire spread, random ignitions, and refill success---still unfolds stochastically from that starting state; because the policy changes across episodes, trajectories diverge even under a fixed reset seed. This design focuses learning on robust behavior under a fixed initial setting while still exposing the policy to diverse stochastic within-episode dynamics.
+
+\textbf{Execution evaluation.} The selected checkpoints are each evaluated on $N=50$ episodes per setup with distinct environment seeds ($200, 201, \ldots, 249$). Results are aggregated over all three checkpoints (150 observations per method per setup) and reported as mean~$\pm$~std. The three seed ranges are disjoint by construction, preventing any overlap between training, validation, and evaluation episodes.
+
+
+
+\subsection{Convergence, checkpoint selection, and statistical testing.}\label{sec:convergence_appendix}
+In closed settings, a common stability criterion is
+\begin{equation}
+\left| \bar{R}_{t} - \bar{R}_{t-W} \right| < \varepsilon ,
+\end{equation}
+\noindent\textit{where} $\bar{R}_{t}$ is the moving-average return at episode $t$; $W$ is a smoothing window; $\varepsilon$ is a small stability threshold.
+
+In open settings, episode returns vary under different realizations of the task and agent sets, so convergence is assessed over an evaluation distribution.
+For a saved checkpoint $\theta_k$, we estimate its expected performance as
+\begin{equation}
+\hat{\mu}_k = \frac{1}{|\mathcal{S}|N}\sum_{s\in \mathcal{S}}\sum_{i=1}^{N} R(\theta_k; s, i),
+\end{equation}
+\noindent\textit{where} $\mathcal{S}$ is the set of setups; $N$ is the number of evaluation seeds per setup; $R(\theta_k; s,i)$ is the episode return of checkpoint $\theta_k$ on setup $s$ and seed $i$.
+
+
+We select the top three checkpoints for each method by $\hat{\mu}_k$ over the second half of training and report mean $\pm$ std over their aggregated evaluation episodes.
+
+\paragraph{Statistical test procedure.}\label{sec:stat_testing}
+We use a \textbf{one-sided paired $t$-test}~\citep{student1908probable} for all significance claims.
+Because every method is evaluated on the same fixed seed set, each seed produces one matched observation per method under identical stochastic conditions; pairing by seed removes this shared variance and is strictly more powerful than an unpaired test on the same data~\cite{montgomery2017design}.
+For the empirically best model $a$ and any competitor $b$, we form per-seed differences over their shared seed set $\mathcal{S}_{ab}$,
+\begin{equation}
+t \;=\; \frac{\bar{\delta}}{\,s_{\delta}/\sqrt{|\mathcal{S}_{ab}|}},
+\qquad
+\bar{\delta} = \frac{1}{|\mathcal{S}_{ab}|}\sum_{s \in \mathcal{S}_{ab}}\delta_s,
+\quad
+\delta_s = r_a(s) - r_b(s),
+\label{eq:paired_t}
+\end{equation}
+\noindent\textit{where} $s_{\delta}$ is the sample standard deviation of $\{\delta_s\}$; differences are negated for cost metrics (lower is better).
+The test is one-sided because the candidate best model is identified by its empirical mean before the test is applied, fixing the direction of interest in advance.
+A model is \textbf{bolded} only when it significantly outperforms \emph{every} other model in the comparison family; no cell is bolded when no model qualifies.
+
+\paragraph{Bonferroni correction and comparison families.}
+We apply Bonferroni correction $\alpha = 0.05/k$~\cite{hochberg1987multiple}, where $k$ is the number of models in the \emph{comparison family} for each table.
+Bonferroni requires no assumptions on the dependence structure among tests and is the most conservative choice; with the small $k$ values used here, the power cost is negligible.
+We define three families, each scoped to the scientific question of the corresponding table:
+
+\begin{itemize}%[leftmargin=1.5em, itemsep=2pt]
+    \item \textbf{Main results --- $2\times3$ and $3\times3$ grids} (Tables~\ref{tab:reward_3x3}, \ref{tab:rpf_3x3}, and the corresponding $2\times3$ and $3\times3$ appendix tables): all $k=8$ models---PLATO (MLP-Additive), DGN, MOHITO, DICG, NOOP, Random, Weakest, Strongest---giving $\alpha = 0.05/8 = 0.00625$. The family is per table (per metric, per grid), consistent with standard practice in empirical MARL~\cite{demsar2006statistical}.
+
+    \item \textbf{Main results --- $4\times4$ grid} (Appendix~\ref{Detailed_Results}, $4\times4$ tables): naive baselines were not trained or evaluated on $4\times4$; the family is the $k=4$ smart models (PLATO, DGN, MOHITO, DICG), giving $\alpha = 0.05/4 = 0.0125$.
+
+    \item \textbf{Zero-shot generalization} (Table~\ref{tab:cross_4x4_reward_3x3}, Appendix~\ref{sec:zeroshot_appendix}): naive baselines have no learned policy and do not participate in the generalization question; the family is $k=4$ smart models (PLATO, DGN, MOHITO, DICG), giving $\alpha = 0.05/4 = 0.0125$.
+
+    \item \textbf{Ablation study} (Table~\ref{tab:ablate_reward_stacked_3x3_4x4}, Appendix~\ref{sec:ablation_appendix}): only PLATO variants are compared; the $k=6$ variants are MLP-Additive (reference), MLP-Dotproduct, LSTM-Additive, LSTM-Dotproduct, No-Team-Stats, and No-GNN-Critic, giving $\alpha = 0.05/6 \approx 0.0083$.
+\end{itemize}
+
+\paragraph{Effect sizes.}
+We report Cohen's $d_z$~\cite{cohen1988statistical}, the standard effect-size index for paired-difference designs:
+\begin{equation}
+    d_z \;=\; \frac{\bar{\delta}}{s_{\delta}}.
+    \label{eq:dz}
+\end{equation}
+\noindent\textit{where} $\bar{\delta}$ and $s_{\delta}$ are as defined in Eq.~\ref{eq:paired_t}.
+Because a bold model may beat several competitors, we report its \emph{minimum} $d_z$---its advantage over the closest competitor---as the most conservative summary.
+By convention~\cite{cohen1988statistical}, $d_z \ge 0.2$, $0.5$, and $0.8$ correspond to small, medium, and large effects.
+Bold cells display this value as $\mathbf{x{\pm}y}${\scriptsize($d_z{\geq}z$)}.
+
+
+\subsection{Network Architecture and Training Configuration}\label{network_architecture}
+
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{PLATO (MLP)} & \textbf{PLATO (LSTM)} & \textbf{MOHITO} & \textbf{DGN} & \textbf{DICG} \\
+\hline
+\multicolumn{6}{|c|}{\textit{Network Architecture}} \\
+\hline
+Hidden Dimension (Actor) & 128 & 128 & 32 & 128 & 128 \\
+Hidden Dimension (Critic) & 128 & 128 & 32 & 128 & 128 \\
+Activation Function & ReLU, Leaky ReLU & ReLU, Leaky ReLU & ReLU & ReLU & Tanh \\
+\hline
+\multicolumn{6}{|c|}{\textit{Learning Rates \& Optimization}} \\
+\hline
+Actor Learning Rate & 5e-4 & 5e-4 & 1e-4 & 5e-3 & 1e-4 \\
+Critic Learning Rate & 9e-4 & 9e-4 & 5e-4 & 1e-4 & 1e-4 \\
+Optimizer & Adam & Adam & Adam & RMSprop & Adam \\
+Optimizer Epsilon & 1e-5 & 1e-5 & 1e-8 & 1e-5 & 1e-5 \\
+Gradient Clipping & 1.0 & 1.0 & 1.0 & 10.0 & 10.0 \\
+\hline
+\multicolumn{6}{|c|}{\textit{Input Processing}} \\
+\hline
+Observation Padding & No & No & No & Yes & Yes \\
+Padding Value & - & - & - & -1.0 & -1 \\
+\hline
+\multicolumn{6}{|c|}{\textit{Data Collection}} \\
+\hline
+Batch Size & 2048 & 2048 & 16 & 1024 & 1024 \\
+Parallel Environments & 1 & 1 & 1 & 1 & 1 \\
+\hline
+\multicolumn{6}{|c|}{\textit{Hyper Parameter Tuning Configuration}} \\
+\hline
+Hyperparameter Tuning & Optuna & Optuna & Optuna & Optuna & Optuna \\
+\hline
+\end{tabular}
+\caption{Configuration: Network architecture and training configuration for all methods. All methods are tuned using Optuna\cite{akiba2019optuna}. }
+\label{tab:network_architecture}
+\end{table*}
+
+
+\subsection{Detailed Results}\label{Detailed_Results}
+
+This appendix provides detailed results on performance and efficiency (burnouts, putouts, NOOP\%, and reward per fight) for all experimental configurations.
+These metrics complement the episode returns reported in the main text and offer insight into the behavioral differences between methods. Putouts measure successful task completion. Burnouts measure failures (fires reaching terminal intensity). NOOP\% measures action efficiency and implicit idleness induced by AO or conservative policies. 
+
+\subsubsection{Trained and executed on the same grids: $2\times 3$ and $3\times 3$}
+\label{Additional_Results}
+
+% -----------------------
+% Reward (2x3 only, appendix)
+% -----------------------
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$2\times 3$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 4.00$\pm$0.00 & \textbf{65.48$\pm$19.59} & 68.20$\pm$17.14 & 76.52$\pm$13.84 \\
+DICG & 4.00$\pm$0.00 & 21.24$\pm$14.86 & 52.48$\pm$12.39 & 71.92$\pm$7.86 \\
+DGN & 3.92$\pm$0.57 & 15.68$\pm$10.78 & 48.88$\pm$14.99 & 71.28$\pm$13.62 \\
+MOHITO  & 4.00$\pm$0.00 & 11.64$\pm$8.10 & 11.84$\pm$13.58 & 72.12$\pm$7.67 \\
+NOOP & -4.00$\pm$0.00 & -4.00$\pm$0.00 & -6.00$\pm$0.00 & -6.00$\pm$0.00 \\
+Random & 3.92$\pm$0.57 & 4.36$\pm$2.27 & 3.56$\pm$11.24 & 34.48$\pm$18.00 \\
+Weakest & 4.00$\pm$0.00 & 3.68$\pm$0.74 & 64.00$\pm$0.00 & 64.00$\pm$0.00 \\
+Strongest & 4.00$\pm$0.00 & 5.24$\pm$3.68 & 24.44$\pm$25.75 & 63.12$\pm$1.08 \\
+
+
+\bottomrule
+\end{tabular}
+\caption{Performance: Episode return (mean $\pm$ std) on the $2\times 3$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:reward_2x3}
+\end{table}
+
+
+
+% -----------------------
+% Reward per Fight (2x3 only, appendix)
+% -----------------------
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Reward per Fight ($2\times 3$)} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 1.28$\pm$0.52 & 0.50$\pm$0.08 & \textbf{0.67$\pm$0.15} & 0.57$\pm$0.14 \\
+DICG & 1.33$\pm$0.00 & 0.45$\pm$0.30 & 0.51$\pm$0.13 & 0.56$\pm$0.07 \\
+DGN & 1.15$\pm$0.54 & 0.46$\pm$0.44 & 0.48$\pm$0.20 & 0.53$\pm$0.14 \\
+MOHITO  & 1.00$\pm$0.00 & 0.35$\pm$0.24 & 0.17$\pm$0.32 & 0.52$\pm$0.05 \\
+NOOP & -4.00$\pm$0.00 & -4.00$\pm$0.00 & -6.00$\pm$0.00 & -6.00$\pm$0.00 \\
+Random & 1.15$\pm$0.54 & 0.79$\pm$0.68 & -0.08$\pm$0.33 & 0.38$\pm$0.13 \\
+Weakest & 1.21$\pm$0.28 & 1.15$\pm$0.43 & 0.53$\pm$0.00 & 0.43$\pm$0.00 \\
+Strongest & 1.21$\pm$0.28 & \textbf{1.19$\pm$0.34} & 0.10$\pm$0.30 & 0.43$\pm$0.01 \\
+
+\bottomrule
+\end{tabular}
+\caption{Efficiency: Reward per fight (mean $\pm$ std) on the $2\times 3$ grid. PLATO denotes the MLP additive variant. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:rpf_2x3}
+\end{table}
+
+Tables~\ref{tab:burnout_2x3_3x3}--\ref{tab:rpf_2x3_3x3} report performance when models are trained and evaluated on the same grid size.
+PLATO refers to the MLP+additive variant unless otherwise noted.
+
+% ==========================
+% (2x3 + 3x3): Detailed Results (Appendix) [UPDATED]
+% ==========================
+
+% -----------------------
+% Burnouts (2x3 + 3x3) [UPDATED]
+% -----------------------
+\begin{table*}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 1.06$\pm$0.24 & 1.02$\pm$0.14
+& 0.00$\pm$0.00 & 0.08$\pm$0.34 & \textbf{2.06$\pm$0.24} & \textbf{2.60$\pm$0.53}\\
+DICG & 0.00$\pm$0.00 & 0.34$\pm$0.48 & 1.04$\pm$0.20 & 1.00$\pm$0.00
+& 0.00$\pm$0.00 & 0.50$\pm$0.68 & 2.98$\pm$0.32 & 3.20$\pm$0.45\\
+DGN & 0.02$\pm$0.14 & 0.68$\pm$0.47 & 1.08$\pm$0.27 & 1.02$\pm$0.14
+& 0.06$\pm$0.24 & 0.60$\pm$0.67 & 3.06$\pm$0.42 & 3.24$\pm$0.48\\
+MOHITO  & 0.00$\pm$0.00 & 0.72$\pm$0.45 & 1.74$\pm$0.44 & 1.02$\pm$0.14
+& 0.00$\pm$0.00 & 0.92$\pm$0.75 & 3.00$\pm$0.40 & 3.10$\pm$0.42 \\
+NOOP & 2.00$\pm$0.00 & 2.00$\pm$0.00 & 2.00$\pm$0.00 & 2.00$\pm$0.00
+& 4.00$\pm$0.00 & 4.00$\pm$0.00 & 4.00$\pm$0.00 & 4.00$\pm$0.00 \\
+Random & 0.02$\pm$0.14 & 0.62$\pm$0.57 & 1.94$\pm$0.24 & 1.38$\pm$0.49
+& 0.50$\pm$0.61 & 0.88$\pm$0.87 & 3.74$\pm$0.44 & 3.88$\pm$0.33\\
+Weakest & 0.00$\pm$0.00 & 0.16$\pm$0.37 & 1.00$\pm$0.00 & 1.00$\pm$0.00
+& 0.00$\pm$0.00 & 0.06$\pm$0.24 & 2.50$\pm$0.51 & 3.00$\pm$0.00 \\
+Strongest & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 1.40$\pm$0.49 & 1.00$\pm$0.00
+& 0.00$\pm$0.00 & 0.18$\pm$0.44 & 3.28$\pm$0.64 & 3.32$\pm$0.59 \\
+
+
+\bottomrule
+\end{tabular}
+\caption{Performance: Burnouts per episode (mean $\pm$ std) on $2\times 3$ and $3\times 3$ grids. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:burnout_2x3_3x3}
+\end{table*}
+
+
+% -----------------------
+% Putouts (2x3 + 3x3) [UPDATED]
+% -----------------------
+\begin{table*}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+
+PLATO & 2.00$\pm$0.00 & \textbf{32.74$\pm$9.80} & 35.66$\pm$8.68 & 39.98$\pm$6.76
+    & 4.00$\pm$0.00 & 3.92$\pm$0.34 & \textbf{61.78$\pm$5.34} & \textbf{45.48$\pm$9.24} \\
+DICG  & 2.00$\pm$0.00 & 10.96$\pm$7.36 & 28.20$\pm$6.05 & 37.96$\pm$3.93
+    & 4.00$\pm$0.00 & 3.50$\pm$0.68 & 35.70$\pm$6.57 & 26.56$\pm$8.18 \\
+DGN & 1.98$\pm$0.14 & 8.52$\pm$5.46 & 26.50$\pm$7.26 & 37.66$\pm$6.70
+    & 3.94$\pm$0.24 & 3.40$\pm$0.67 & 27.60$\pm$7.73 & 21.68$\pm$7.28 \\
+MOHITO  & 2.00$\pm$0.00 & 6.54$\pm$4.08 & 8.66$\pm$6.52 & 38.08$\pm$3.83
+    & 4.00$\pm$0.00 & 3.08$\pm$0.75 & 29.14$\pm$9.80 & 30.80$\pm$8.28 \\
+NOOP  & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 0.00$\pm$0.00
+    & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 0.00$\pm$0.00 \\
+Random & 1.98$\pm$0.14 & 2.80$\pm$1.28 & 4.70$\pm$5.53 & 19.62$\pm$8.60
+    & 3.50$\pm$0.61 & 3.12$\pm$0.87 & 11.48$\pm$7.72 & 6.32$\pm$6.24 \\
+Weakest & 2.00$\pm$0.00 & 2.00$\pm$0.00 & 34.00$\pm$0.00 & 34.00$\pm$0.00
+    & 4.00$\pm$0.00 & 3.94$\pm$0.24 & 39.68$\pm$10.83 & 23.72$\pm$0.86 \\
+Strongest & 2.00$\pm$0.00 & 2.62$\pm$1.84 & 13.14$\pm$12.60 & 33.54$\pm$0.50
+        & 4.00$\pm$0.00 & 3.82$\pm$0.44 & 17.40$\pm$13.95 & 12.28$\pm$9.63 \\
+
+\bottomrule
+\end{tabular}
+\caption{Performance: Putouts per episode (mean $\pm$ std) on $2\times 3$ and $3\times 3$ grids. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:putout_2x3_3x3}
+\end{table*}
+
+
+% -----------------------
+% NOOP (2x3 + 3x3) [UPDATED]
+% -----------------------
+\begin{table*}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+
+PLATO & 25.56$\pm$20.93\% & \textbf{55.73$\pm$13.18\%} & 64.70$\pm$5.12\% & 55.87$\pm$2.39\%
+    & 32.85$\pm$10.19\% & 93.53$\pm$3.26\% & 49.79$\pm$2.74\% & 57.75$\pm$6.78\% \\
+DICG & 0.00$\pm$0.00\% & 80.45$\pm$14.62\% & 65.04$\pm$3.57\% & 57.37$\pm$2.57\%
+    & 59.76$\pm$9.53\% & 92.85$\pm$3.43\% & 55.92$\pm$6.50\% & 61.83$\pm$5.89\% \\
+DGN & 38.00$\pm$23.86\% & 83.98$\pm$11.18\% & 65.40$\pm$3.26\% & 55.33$\pm$2.87\%
+    & 43.75$\pm$7.44\% & 94.18$\pm$3.85\% & 59.88$\pm$6.83\% & 64.95$\pm$5.31\% \\
+MOHITO  & 55.56$\pm$0.00\% & 86.94$\pm$8.32\% & 75.31$\pm$4.84\% & 53.37$\pm$2.13\%
+    & \textbf{0.00$\pm$0.00\%} & 93.85$\pm$3.47\% & 57.93$\pm$7.01\% & 58.41$\pm$5.64\% \\
+NOOP & 100.00$\pm$0.00\% & 100.00$\pm$0.00\% & 100.00$\pm$0.00\% & 100.00$\pm$0.00\%
+    & 100.00$\pm$0.00\% & 100.00$\pm$0.00\% & 100.00$\pm$0.00\% & 100.00$\pm$0.00\% \\
+Random  & 37.92$\pm$24.17\% & 94.83$\pm$7.96\% & 63.25$\pm$9.93\% & 63.97$\pm$2.39\%
+    & 46.45$\pm$15.84\% & 94.33$\pm$3.02\% & 70.37$\pm$4.43\% & 67.39$\pm$7.99\% \\
+Weakest & 3.56$\pm$8.23\% & 98.57$\pm$0.99\% & 60.00$\pm$0.00\% & 50.67$\pm$0.00\%
+    & 12.00$\pm$11.19\% & 96.36$\pm$1.50\% & 52.25$\pm$8.51\% & 64.63$\pm$0.10\% \\
+Strongest & 3.56$\pm$8.23\% & 97.61$\pm$4.04\% & \textbf{44.87$\pm$11.81\%} & 50.67$\pm$0.00\%
+    & 12.00$\pm$11.19\% & 93.24$\pm$5.15\% & 51.50$\pm$11.60\% & 54.59$\pm$13.51\% \\
+
+\bottomrule
+\end{tabular}
+\caption{Efficiency: NOOP percentage per episode on $2\times 3$ and $3\times 3$ (mean $\pm$ std).}
+\label{tab:noop_2x3_3x3}
+\end{table*}
+
+
+% -----------------------
+% Reward per fight (2x3 + 3x3) 
+% -----------------------
+\begin{table*}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 1.28$\pm$0.52 & 0.50$\pm$0.08 & \textbf{0.67$\pm$0.15} & 0.57$\pm$0.14
+ & \textbf{1.30$\pm$0.23} & 0.55$\pm$0.39 & \textbf{0.77$\pm$0.07} & \textbf{0.65$\pm$0.09} \\
+DICG & 1.33$\pm$0.00 & 0.45$\pm$0.30 & 0.51$\pm$0.13 & 0.56$\pm$0.07
+& 0.48$\pm$0.35 & 0.33$\pm$0.21 & 0.47$\pm$0.08 & 0.39$\pm$0.16 \\
+DGN & 1.15$\pm$0.54 & 0.46$\pm$0.44 & 0.48$\pm$0.20 & 0.53$\pm$0.14
+& 0.69$\pm$0.39 & 0.50$\pm$0.48 & 0.39$\pm$0.10 & 0.33$\pm$0.14 \\
+MOHITO  & 1.00$\pm$0.00 & 0.35$\pm$0.24 & 0.17$\pm$0.32 & 0.52$\pm$0.05
+& 0.89$\pm$0.00 & 0.34$\pm$0.37 & 0.34$\pm$0.32 & 0.42$\pm$0.12 \\
+NOOP & -4.00$\pm$0.00 & -4.00$\pm$0.00 & -6.00$\pm$0.00 & -6.00$\pm$0.00
+    & -8.00$\pm$0.00 & -8.00$\pm$0.00 & -12.00$\pm$0.00 & -12.00$\pm$0.00 \\
+Random & 1.15$\pm$0.54 & 0.79$\pm$0.68 & -0.08$\pm$0.33 & 0.38$\pm$0.13
+    & 0.73$\pm$0.36 & 0.38$\pm$0.39 & 0.03$\pm$0.49 & -0.22$\pm$0.47 \\
+Weakest & 1.21$\pm$0.28 & 1.15$\pm$0.43 & 0.53$\pm$0.00 & 0.43$\pm$0.00
+    & 1.03$\pm$0.13 & \textbf{0.87$\pm$0.44} & 0.48$\pm$0.07 & 0.35$\pm$0.02 \\
+Strongest & 1.21$\pm$0.28 & \textbf{1.19$\pm$0.34} & 0.10$\pm$0.30 & 0.43$\pm$0.01
+& 1.03$\pm$0.13 & 0.71$\pm$0.57 & -0.10$\pm$0.62 & -0.16$\pm$0.57 \\
+
+\bottomrule
+\end{tabular}
+\caption{Efficiency: Reward per fight on $2\times 3$ and $3\times 3$ (mean $\pm$ std). Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:rpf_2x3_3x3}
+\end{table*}
+
+\subparagraph{Episode Return (Table~\ref{tab:reward_2x3}).}
+PLATO achieves statistically significant best performance in Setup~1 on $2\times 3$, where fire spread as the sole openness mechanism drives differentiation; DICG and DGN lag substantially. In Setups~2--3 on $2\times 3$, no method reaches statistical significance; MOHITO recovers in Setup~3 while lagging most in Setup~2. On $3\times 3$, PLATO achieves the highest returns with statistical significance in Setups~2--3. In Setup~0, all methods achieve equivalent returns on both grids.
+
+\subparagraph{Burnouts (Table~\ref{tab:burnout_2x3_3x3}).}
+On $2\times 3$, burnout counts are similar across smart methods in all open setups; MOHITO and DGN tend to incur more in Setup~1. On $3\times 3$, PLATO achieves statistically significant fewest burnouts in Setups~2--3, with the margin over baselines widening under combined openness. In Setup~0, all smart methods achieve near-zero burnouts on both grids.
+
+\subparagraph{Putouts (Table~\ref{tab:putout_2x3_3x3}).}
+PLATO achieves statistically significant best task completions in Setup~1 on $2\times 3$; in Setups~2--3 no method reaches significance and Weakest competes numerically on $2\times 3$. On $3\times 3$, PLATO achieves statistically significant best putouts in Setups~2--3, with the gap widening under higher openness. MOHITO recovers in Setup~3 on $3\times 3$ compared to the lower grids, reflecting improved coordination at scale under combined openness.
+
+\subparagraph{NOOP Usage (Table~\ref{tab:noop_2x3_3x3}).}
+PLATO achieves the statistically significant lowest idle rate in Setup~1 on $2\times 3$, while DICG exhibits near-zero NOOP in Setup~0 (the only significant winner there). On $3\times 3$, MOHITO achieves the statistically significant lowest NOOP in Setup~0 due to its aggressive suppression policy. In Setup~2 on $2\times 3$, Strongest achieves the statistically significant lowest NOOP. All methods show elevated NOOP in Setup~1 on $3\times 3$ due to the higher agent-to-fire ratio.
+
+\subparagraph{Reward per Fight (Table~\ref{tab:rpf_2x3_3x3}).}
+PLATO achieves the statistically significant highest reward per fight in Setup~2 on $2\times 3$ and in Setups~0, 2--3 on $3\times 3$, reflecting efficient suppressant allocation. On $2\times 3$ Setup~1, Strongest achieves the statistically significant best per-fight efficiency. On $3\times 3$ Setup~1, Weakest achieves the statistically significant best reward per fight.
+
+
+
+% Episode return (4x4) normal train and test on 4x4
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 12.00$\pm$0.00 & \textbf{19.76$\pm$9.03} & \textbf{230.48$\pm$24.30} & \textbf{149.96$\pm$27.58} \\
+DICG & 12.00$\pm$0.00 & 12.20$\pm$4.43 & 129.84$\pm$21.87 & 79.88$\pm$25.66 \\
+DGN & 11.92$\pm$0.57 & 11.12$\pm$5.44 & 90.68$\pm$22.07 & 68.24$\pm$15.77 \\
+MOHITO  & 12.00$\pm$0.00 & 6.80$\pm$9.42 & 53.28$\pm$28.82 & 39.28$\pm$15.48 \\
+\bottomrule
+\end{tabular}
+\caption{Episode return (mean $\pm$ std) on the $4\times 4$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:reward_4x4}
+\end{table}
+
+
+
+% Burnouts (4x4)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 0.00$\pm$0.00 & \textbf{0.30$\pm$0.46} & \textbf{2.20$\pm$0.40} & \textbf{3.50$\pm$0.58} \\
+DICG & 0.00$\pm$0.00 & 0.62$\pm$0.70 & 3.74$\pm$0.56 & 4.50$\pm$0.65 \\
+DGN & 0.02$\pm$0.14 & 1.12$\pm$0.87 & 4.56$\pm$0.61 & 4.82$\pm$0.39 \\
+MOHITO  & 0.00$\pm$0.00 & 2.24$\pm$0.96 & 4.66$\pm$0.69 & 4.52$\pm$0.54 \\
+\bottomrule
+\end{tabular}
+\caption{Burnouts (mean $\pm$ std) on the $4\times 4$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:burnouts_4x4}
+\end{table}
+
+% Putouts (4x4)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 6.00$\pm$0.00 & \textbf{10.18$\pm$4.33} & \textbf{119.44$\pm$11.91} & \textbf{81.34$\pm$13.27} \\
+DICG & 6.00$\pm$0.00 & 6.72$\pm$2.19 & 70.66$\pm$10.59 & 47.44$\pm$12.31 \\
+DGN & 5.98$\pm$0.14 & 6.68$\pm$2.43 & 51.88$\pm$10.62 & 41.90$\pm$7.69 \\
+MOHITO  & 6.00$\pm$0.00 & 5.64$\pm$4.31 & 33.24$\pm$13.94 & 27.12$\pm$7.47 \\
+\bottomrule
+\end{tabular}
+\caption{Putouts (mean $\pm$ std) on the $4\times 4$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:putouts_4x4}
+\end{table}
+
+
+% NOOP percentage (4x4)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{37.09$\pm$11.60\%} & 91.53$\pm$4.36\% & \textbf{48.77$\pm$3.87\%} & \textbf{61.85$\pm$4.68\%} \\
+DICG & 72.90$\pm$12.02\% & 96.04$\pm$1.73\% & 57.89$\pm$5.05\% & 69.17$\pm$4.74\% \\
+DGN & 72.08$\pm$6.13\% & 94.70$\pm$3.03\% & 65.71$\pm$4.87\% & 72.54$\pm$4.20\% \\
+MOHITO  & 44.44$\pm$0.00\% & 93.42$\pm$4.37\% & 74.01$\pm$4.77\% & 75.76$\pm$5.31\% \\
+\bottomrule
+\end{tabular}
+\caption{NOOP percentage (mean $\pm$ std) on the $4\times 4$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:noop_4x4}
+\end{table}
+
+
+
+% Reward per fight (4x4)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 1.09$\pm$0.25 & 0.45$\pm$0.21 & \textbf{0.75$\pm$0.06} & \textbf{0.65$\pm$0.08} \\
+DICG & 0.79$\pm$0.36 & \textbf{0.57$\pm$0.23} & 0.51$\pm$0.06 & 0.43$\pm$0.11 \\
+DGN & 0.47$\pm$0.35 & 0.42$\pm$0.24 & 0.44$\pm$0.09 & 0.42$\pm$0.08 \\
+MOHITO  & \textbf{1.20$\pm$0.00} & 0.24$\pm$0.30 & 0.28$\pm$0.36 & 0.27$\pm$0.10 \\
+\bottomrule
+\end{tabular}
+\caption{Reward per fight (mean $\pm$ std) on the $4\times 4$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:rpf_4x4}
+\end{table}
+
+
+
+\subparagraph{Episode Return (Table~\ref{tab:reward_4x4}).}
+PLATO achieves statistically significant highest returns in Setups~1--3, demonstrating its advantage when task diversity and agent openness co-occur. In Setup~0, all methods achieve equivalent returns. DICG ranks second across open setups while MOHITO lags most consistently, especially under moderate openness.
+
+\subparagraph{Burnouts (Table~\ref{tab:burnouts_4x4}).}
+PLATO achieves statistically significant fewest burnouts in Setups~1--3, reflecting more effective task prioritization across all open configurations. MOHITO and DGN accumulate the highest burnout counts under open conditions. In Setup~0, all smart methods achieve near-zero burnouts.
+
+\subparagraph{Putouts (Table~\ref{tab:putouts_4x4}).}
+PLATO achieves statistically significant best putouts in Setups~1--3. In Setup~0, putout counts are equivalent across all smart methods. MOHITO achieves the fewest putouts under open setups, consistent with its higher NOOP rates and lower task completion.
+
+\subparagraph{NOOP Usage (Table~\ref{tab:noop_4x4}).}
+PLATO achieves the statistically significant lowest idle rate in Setups~0, 2, and~3, reflecting active task engagement across conditions. MOHITO achieves the statistically significant lowest NOOP in Setup~0 due to its aggressive suppressant usage. In Setup~1, all methods exhibit elevated NOOP rates driven by frequent agent exits.
+
+\subparagraph{Reward per Fight (Table~\ref{tab:rpf_4x4}).}
+PLATO achieves the statistically significant highest reward per fight in Setups~2--3. In Setup~1, DICG achieves the statistically significant best per-fight efficiency. In Setup~0, MOHITO achieves the statistically significant best per-fight efficiency at this scale. Per-fight efficiency declines with openness for all methods.
+
+% ==========================
+% Zero-Shot 4x4: Detailed Results (Appendix)
+% ==========================
+\subsubsection{$4\times 4$ Zero-Shot: Detailed Results}\label{sec:zeroshot_appendix}
+
+This appendix provides detailed results on performance and efficiency (burnouts, putouts, NOOP\%, and reward per fight) for zero-shot execution on $4\times 4$.
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.6pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $4\times 4$} \\
+\midrule
+Model  & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{11.92$\pm$2.32} & 5.52$\pm$9.19 & \textbf{65.20$\pm$10.17} & 14.20$\pm$36.75 \\
+DICG & 11.44$\pm$1.94 & 8.64$\pm$12.10 & 61.32$\pm$11.98 & 49.44$\pm$16.81 \\
+DGN & 4.24$\pm$3.63 & 5.80$\pm$8.18 & 42.76$\pm$25.62 & 47.48$\pm$24.88 \\
+MOHITO  & 6.24$\pm$0.96 & -0.56$\pm$5.61 & -11.44$\pm$11.15 & 24.40$\pm$24.91 \\
+
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Episode return on $4\times 4$ under zero-shot evaluation when trained on $2\times 3$ (mean $\pm$ std). Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:cross_4x4_reward_from_2x3_full}
+\end{table}
+
+% -------------------------
+% 4x4: Burnouts (execute on 4x4), no averages
+% Merged by train grid
+% [UPDATED: PLATO = MLP additive]
+% -------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 0.52$\pm$0.58 & 3.66$\pm$0.87 & 6.00$\pm$0.00 & 6.54$\pm$0.50
+ & 1.00$\pm$0.67 & \textbf{3.78$\pm$1.04} & \textbf{5.88$\pm$0.52} & \textbf{6.02$\pm$0.25} \\
+DICG & 0.64$\pm$0.48 & 3.84$\pm$0.98 & 5.96$\pm$0.20 & 6.06$\pm$0.24
+& 0.90$\pm$0.42 & 3.98$\pm$0.68 & 6.00$\pm$0.00 & 6.04$\pm$0.20 \\
+DGN & 2.44$\pm$0.91 & 4.46$\pm$0.86 & 6.16$\pm$0.37 & 6.10$\pm$0.30
+& 1.76$\pm$1.00 & 4.72$\pm$1.01 & 6.06$\pm$0.24 & 6.16$\pm$0.37\\
+MOHITO  & 1.94$\pm$0.24 & 4.56$\pm$0.67 & 6.78$\pm$0.42 & 6.34$\pm$0.48
+& \textbf{0.68$\pm$0.47} & 5.04$\pm$0.67 & 6.16$\pm$0.42 & 6.00$\pm$0.00 \\
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Execution burnouts on $4\times 4$ under zero-shot (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:cross_4x4_burnouts}
+\end{table*}
+% ------------------------
+% 4x4: Putouts (execute on 4x4), no averages
+% Merged by train grid
+% [UPDATED: PLATO = MLP additive]
+% ------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 6.48$\pm$0.58 & 6.42$\pm$4.17 & \textbf{41.58$\pm$5.08} & 17.62$\pm$17.90
+& 6.00$\pm$0.67 & 6.48$\pm$3.63 & 38.00$\pm$9.63 & \textbf{38.88$\pm$8.64} \\
+DICG & 6.36$\pm$0.48 & 8.16$\pm$5.62 & 39.62$\pm$6.02 & 34.78$\pm$8.21
+ & 6.10$\pm$0.42 & 8.26$\pm$4.30 & \textbf{40.64$\pm$5.91} & 35.84$\pm$6.97 \\
+DGN & 4.56$\pm$0.91 & 7.36$\pm$4.00 & 30.54$\pm$12.47 & 33.84$\pm$12.17
+& 5.24$\pm$1.00 & 4.50$\pm$2.48 & 33.80$\pm$9.46 & 28.90$\pm$13.27\\
+MOHITO  & 5.06$\pm$0.24 & 4.28$\pm$2.51 & 4.06$\pm$5.32 & 22.50$\pm$12.11
+& \textbf{6.32$\pm$0.47} & 4.40$\pm$3.38 & 30.58$\pm$13.72 & 38.28$\pm$4.92 \\
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Execution putouts on $4\times 4$ under zero-shot (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:cross_4x4_putouts}
+\end{table*}
+
+
+% -----------------------
+% 4x4: NOOP (execute on 4x4), no averages
+% Merged by train grid
+% [UPDATED: PLATO = MLP additive]
+% -----------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+
+PLATO & \textbf{26.20$\pm$16.92\%} & \textbf{87.19$\pm$8.08\%} & \textbf{49.44$\pm$3.18\%} & 58.03$\pm$9.66\%
+& 27.09$\pm$13.14\% & 88.70$\pm$6.07\% & \textbf{46.95$\pm$7.23\%} & 56.73$\pm$3.70\% \\
+DICG & 17.67$\pm$21.87\% & 87.68$\pm$8.64\% & 51.59$\pm$3.70\% & 56.53$\pm$4.38\%
+& \textbf{14.86$\pm$22.74\%} & 89.50$\pm$6.31\% & 49.95$\pm$3.39\% & 54.83$\pm$3.95\% \\
+DGN & 48.55$\pm$14.48\% & 86.02$\pm$7.60\% & 56.97$\pm$5.57\% & 54.98$\pm$5.31\%
+& 48.95$\pm$12.55\% & 90.63$\pm$6.69\% & 58.19$\pm$3.47\% & 59.61$\pm$4.03\% \\
+MOHITO  & 43.11$\pm$6.00\% & 91.60$\pm$4.92\% & 68.83$\pm$11.67\% & 63.55$\pm$5.24\%
+& 54.04$\pm$1.05\% & 90.57$\pm$7.83\% & 55.27$\pm$5.84\% & \textbf{52.23$\pm$2.48\%} \\
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: NOOP action percentage on $4\times 4$ under zero-shot (mean $\pm$ std), grouped by training grid.}
+\label{tab:cross_4x4_noops}
+\end{table*}
+
+
+% -----------------------
+% 4x4: Reward per fight (execute on 4x4), no averages
+% Merged by train grid
+% [NEW: PLATO = MLP additive]
+% -----------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+      & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 0.66$\pm$0.22 & 0.11$\pm$0.16 & 0.43$\pm$0.06 & -0.50$\pm$1.00
+& 0.62$\pm$0.23 & 0.14$\pm$0.20 & 0.36$\pm$0.10 & 0.41$\pm$0.31 \\
+DICG & \textbf{1.07$\pm$0.18} & 0.19$\pm$0.20 & 0.42$\pm$0.08 & 0.33$\pm$0.40
+& \textbf{1.05$\pm$0.16} & \textbf{0.24$\pm$0.17} & \textbf{0.42$\pm$0.08} & 0.38$\pm$0.15 \\
+DGN & 0.31$\pm$0.28 & 0.11$\pm$0.17 & 0.25$\pm$0.40 & 0.25$\pm$0.47
+& 0.42$\pm$0.25 & -0.05$\pm$0.27 & 0.36$\pm$0.30 & 0.13$\pm$0.65 \\
+MOHITO  & 0.66$\pm$0.04 & -0.10$\pm$0.30 & -0.79$\pm$0.81 & 0.09$\pm$0.54
+& 0.51$\pm$0.05 & -0.11$\pm$0.22 & 0.19$\pm$0.52 & 0.39$\pm$0.06 \\
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Reward per fight on $4\times 4$ under zero-shot (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:cross_4x4_rpf}
+\end{table*}
+
+
+%ZERO-SHOT: 2x3 -> 5x5 (Mode: ALL)
+
+
+% Episode return (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $5\times 5$} \\
+
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{10.00$\pm$2.59} & 2.88$\pm$6.33 & \textbf{71.84$\pm$22.95} & 18.72$\pm$29.81 \\
+DICG & 9.36$\pm$2.75 & 2.00$\pm$5.86 & 47.16$\pm$20.08 & 18.12$\pm$18.70 \\
+DGN & 3.84$\pm$1.97 & -2.24$\pm$3.97 & 29.80$\pm$13.18 & 21.08$\pm$19.40 \\
+MOHITO  & 2.08$\pm$2.21 & -3.32$\pm$5.65 & 6.36$\pm$28.05 & 19.76$\pm$22.57 \\
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Episode return (mean $\pm$ std) when trained on $2\times 3$ and tested on $5\times 5$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_reward_5x5}
+\end{table}
+
+
+
+
+% Burnouts (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{1.50$\pm$0.65} & \textbf{3.92$\pm$1.01} & \textbf{6.56$\pm$0.50} & 7.32$\pm$0.55 \\
+DICG & 1.66$\pm$0.69 & 4.74$\pm$0.96 & 6.86$\pm$0.50 & 7.34$\pm$0.48 \\
+DGN & 3.04$\pm$0.49 & 5.20$\pm$0.97 & 7.16$\pm$0.37 & 7.36$\pm$0.48 \\
+MOHITO  & 3.42$\pm$0.57 & 5.66$\pm$0.87 & 7.46$\pm$0.50 & 7.44$\pm$0.50 \\
+\bottomrule
+\end{tabular}
+\caption{Burnouts (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_burnouts_5x5}
+\end{table}
+
+
+% Putouts (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{6.50$\pm$0.65} & 5.36$\pm$2.66 & \textbf{46.48$\pm$11.12} & 20.68$\pm$14.41 \\
+DICG & 6.34$\pm$0.69 & 5.74$\pm$2.23 & 34.44$\pm$9.66 & 20.40$\pm$8.95 \\
+DGN & 4.96$\pm$0.49 & 4.08$\pm$1.35 & 26.06$\pm$6.35 & 21.90$\pm$9.32 \\
+MOHITO  & 4.46$\pm$0.58 & 4.00$\pm$2.53 & 14.64$\pm$13.56 & 21.32$\pm$10.90 \\
+\bottomrule
+\end{tabular}
+\caption{Putouts (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_putouts_5x5}
+\end{table}
+
+
+
+% NOOP percentage (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{18.49$\pm$10.96\%} & \textbf{88.40$\pm$5.48\%} & \textbf{50.05$\pm$7.85\%} & \textbf{59.50$\pm$8.50\%} \\
+DICG & 37.53$\pm$25.75\% & 90.57$\pm$4.26\% & 55.32$\pm$8.34\% & 64.90$\pm$4.98\% \\
+DGN & 43.86$\pm$14.34\% & 91.90$\pm$2.49\% & 65.96$\pm$2.26\% & 63.68$\pm$4.53\% \\
+MOHITO  & 50.32$\pm$15.31\% & 93.11$\pm$5.17\% & 58.26$\pm$8.85\% & 63.04$\pm$5.01\% \\
+\bottomrule
+\end{tabular}
+\caption{NOOP percentage (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_noop_5x5}
+\end{table}
+
+
+
+
+
+% Reward per fight (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $2\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{0.60$\pm$0.20} & 0.07$\pm$0.21 & \textbf{0.47$\pm$0.11} & -0.28$\pm$1.05 \\
+DICG & 0.60$\pm$0.23 & 0.05$\pm$0.20 & 0.33$\pm$0.21 & 0.08$\pm$0.43 \\
+DGN & 0.34$\pm$0.17 & -0.11$\pm$0.18 & 0.27$\pm$0.34 & 0.09$\pm$0.54 \\
+MOHITO  & 0.19$\pm$0.22 & -0.35$\pm$0.47 & -0.69$\pm$1.24 & 0.03$\pm$0.55 \\
+\bottomrule
+\end{tabular}
+\caption{Reward per fight (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_rpf_5x5}
+\end{table}
+
+
+
+
+%ZERO-SHOT: 3x3 -> 5x5 (Mode: ALL)
+
+
+% Episode return (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 7.92$\pm$2.86 & 2.64$\pm$6.87 & \textbf{82.80$\pm$21.42} & \textbf{50.80$\pm$26.40} \\
+DICG & \textbf{9.28$\pm$1.88} & 0.40$\pm$4.90 & 42.28$\pm$18.75 & 22.32$\pm$20.95 \\
+DGN & 7.44$\pm$3.70 & -2.68$\pm$4.13 & 29.44$\pm$11.39 & 14.68$\pm$18.42 \\
+MOHITO  & 9.52$\pm$1.96 & 0.12$\pm$4.32 & 41.16$\pm$22.71 & 26.68$\pm$22.46 \\
+\bottomrule
+\end{tabular}
+\caption{Episode return (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_reward_5x5_from_3x3}
+\end{table}
+
+
+
+% Burnouts (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 2.02$\pm$0.71 & 4.46$\pm$1.01 & \textbf{6.28$\pm$0.45} & \textbf{6.88$\pm$0.56} \\
+DICG & \textbf{1.68$\pm$0.47} & 5.00$\pm$0.99 & 6.98$\pm$0.38 & 7.30$\pm$0.46 \\
+DGN & 2.14$\pm$0.93 & 5.32$\pm$0.98 & 7.00$\pm$0.29 & 7.36$\pm$0.48 \\
+MOHITO  & 1.62$\pm$0.49 & 4.26$\pm$0.99 & 6.84$\pm$0.51 & 7.20$\pm$0.49 \\
+\bottomrule
+\end{tabular}
+\caption{Burnouts (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_burnouts_5x5_from_3x3}
+\end{table}
+
+
+
+
+% Putouts (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 5.98$\pm$0.71 & 5.78$\pm$3.05 & \textbf{51.68$\pm$10.37} & \textbf{36.28$\pm$12.74} \\
+DICG & \textbf{6.32$\pm$0.47} & 5.20$\pm$1.82 & 32.12$\pm$9.12 & 22.46$\pm$10.09 \\
+DGN & 5.86$\pm$0.93 & 3.98$\pm$1.32 & 25.72$\pm$5.60 & 18.70$\pm$8.83 \\
+MOHITO  & 6.38$\pm$0.49 & 4.32$\pm$1.33 & 31.42$\pm$11.01 & 24.54$\pm$10.85 \\
+\bottomrule
+\end{tabular}
+\caption{Putouts (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_putouts_5x5_from_3x3}
+\end{table}
+
+
+% NOOP percentage (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & \textbf{25.08$\pm$14.73\%} & \textbf{92.19$\pm$3.90\%} & \textbf{46.42$\pm$6.96\%} & \textbf{56.08$\pm$7.33\%} \\
+DICG & 17.53$\pm$16.70\% & 90.50$\pm$3.60\% & 59.65$\pm$6.80\% & 63.84$\pm$4.72\% \\
+DGN & 31.06$\pm$15.54\% & 90.13$\pm$3.91\% & 63.88$\pm$5.21\% & 67.51$\pm$3.48\% \\
+MOHITO  & 22.87$\pm$4.90\% & 92.31$\pm$3.06\% & 55.08$\pm$8.60\% & 64.35$\pm$6.45\% \\
+\bottomrule
+\end{tabular}
+\caption{NOOP percentage (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_noop_5x5_from_3x3}
+\end{table}
+
+
+
+
+% Reward per fight (5x5)
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $5\times 5$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 0.55$\pm$0.21 & 0.09$\pm$0.24 & \textbf{0.51$\pm$0.10} & \textbf{0.35$\pm$0.23} \\
+DICG & \textbf{0.92$\pm$0.06} & -0.00$\pm$0.19 & 0.32$\pm$0.25 & 0.07$\pm$0.56 \\
+DGN & 0.50$\pm$0.23 & -0.11$\pm$0.17 & 0.27$\pm$0.10 & 0.06$\pm$0.44 \\
+MOHITO  & 0.75$\pm$0.04 & 0.00$\pm$0.24 & 0.28$\pm$0.24 & 0.01$\pm$0.87 \\
+\bottomrule
+\end{tabular}
+\caption{Reward per fight (mean $\pm$ std) on the $5\times 5$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:zs_rpf_5x5_from_3x3}
+\end{table}
+
+
+
+
+
+
+\subparagraph{Episode Return.}
+Results are mixed across zero-shot target grids. At $4\times 4$, PLATO leads S2 when trained on $2\times 3$ and leads S3 when trained on $3\times 3$, while DICG leads S2 when trained on $3\times 3$; neither achieves statistical significance in most open setups. MOHITO collapses in S2 when trained on $2\times 3$ (negative returns) and in S1 for both training sources. At $5\times 5$, PLATO achieves statistically significant best returns in S2 and S3 for both training sources. DGN degrades consistently under higher openness.
+
+\subparagraph{Burnouts.}
+Under $4\times 4$ ZS, PLATO achieves statistically significant fewest burnouts in Setups~1--3 when trained on $3\times 3$. When trained on $2\times 3$, MOHITO achieves the significant best burnouts in S0. At $5\times 5$, PLATO achieves statistically significant fewest burnouts in S1--S2 for both training sources. DGN and MOHITO consistently accumulate the highest burnouts under open setups.
+
+\subparagraph{Putouts.}
+PLATO leads task completions at $5\times 5$ in open setups with statistical significance from both training sources. At $4\times 4$, PLATO leads S3 (trained on $3\times 3$) and S2 (trained on $2\times 3$) while DICG leads S2 when trained on $3\times 3$ and S1 when trained on $3\times 3$; MOHITO leads S0 when trained on $3\times 3$. MOHITO collapses most severely in S2 when trained on $2\times 3$, achieving the fewest putouts.
+
+\subparagraph{NOOP Usage.}
+PLATO achieves the statistically significant lowest idle rate across S0, S2 from $2\times 3$ training and S2 from $3\times 3$ training at $4\times 4$. DICG achieves the lowest NOOP in S0 when trained on $3\times 3$; MOHITO achieves the lowest in S3 when trained on $3\times 3$. At $5\times 5$, PLATO achieves statistically significant lowest idle rates in S2--S3 for both training sources. All methods show elevated NOOP in Setup~1 under both training regimes.
+
+\subparagraph{Reward per Fight.}
+DICG achieves the statistically significant highest per-fight efficiency in S0 and S1 when trained on $3\times 3$ at $4\times 4$. PLATO leads at $5\times 5$ in S2--S3 for both training sources. MOHITO degrades most severely in S2 when trained on $2\times 3$, consistent with near-zero putouts. Training source has limited effect on PLATO's per-fight efficiency at $5\times 5$, but matters more at $4\times 4$ where DICG outperforms in efficiency despite similar or lower episode return.
+
+\subparagraph{Zero-Shot Summary.}
+PLATO and DICG generalize most effectively across target grids, while DGN and MOHITO degrade under openness, particularly in Setup~1. At $4\times 4$, no single method dominates all setups; PLATO and DICG alternate in leading returns and putouts. At $5\times 5$, PLATO achieves consistent statistical significance in open setups. Training on $3\times 3$ generally yields stronger transfer than $2\times 3$ in S2--S3, reflecting richer task and agent diversity during training. Setup~3 remains the hardest configuration for all methods, and MOHITO collapses most severely under combined openness when trained on $2\times 3$.
+
+% ==========================
+% Ablation Studies - Detailed Results (Appendix)
+% ==========================
+\subsection{Ablation Studies: Detailed Results}\label{sec:ablation_appendix}
+
+This appendix provides detailed results on performance and efficiency (burnouts, putouts, NOOP\%, and reward per fight) for the PLATO ablation study.
+
+\subsubsection{Variant Descriptions}
+We ablate four design choices independently, keeping all other components fixed:
+
+\textbf{MLP vs.\ LSTM encoder-decoder.} The actor encoder processes each agent's observation into a query vector. In the MLP variant (our primary), a feedforward network maps the observation directly to a query with no temporal memory. The LSTM variant replaces this with a recurrent unit that maintains a hidden state across timesteps, enabling the actor to condition its task selection on the history of observations within an episode. Both variants use the same additive attention scorer unless otherwise stated.
+
+\textbf{Additive vs.\ dot-product attention scorer.} The pointer scoring function computes a compatibility score between the agent query and each task key. The additive (Bahdanau) scorer applies learned projection matrices $W_q$, $W_K$, and a learned vector $v$ to compute $u_x = v^\top \tanh(W_K k_x + W_q q)$, allowing the model to learn a nonlinear compatibility function. The dot-product scorer instead computes $u_x = q^\top k_x$ (after projection to a shared space), using inner-product similarity. Additive attention introduces more parameters but provides a richer compatibility signal.
+
+\textbf{No-TS (No Team Statistics).} The standard PLATO actor aggregates the observations of all current teammates into a fixed-length team context vector via mean, variance, min, and max statistics, which is then fused with the agent's own observation to form the query. In the No-TS variant, this aggregation is removed: the agent query is computed from the agent's own observation alone, without any explicit representation of the current team composition. This isolates the contribution of team-level context to task selection under AO.
+
+\textbf{No-GNN (No Graph-Structured Critic).} The standard PLATO critic uses a GNN over a bipartite agent-task graph to estimate the joint value function, naturally handling varying numbers of agents and tasks. In the No-GNN variant, the GNN critic is replaced with a padded MLP critic: agent and task features are concatenated after zero-padding to a fixed maximum count and passed through a feedforward network. This isolates the contribution of the graph-structured value function, particularly under generalization to unseen grid sizes where the agent and task counts differ from training.
+
+\subsubsection{Detailed Results}
+% -----------------------
+% Ablations: Reward (2x3) [APPENDIX]
+% -----------------------
+\begin{table}
+\centering
+\small
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.02}
+
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l@{\hspace{2pt}}}
+\toprule
+\multicolumn{5}{c}{$2\times 3$} \\
+\midrule
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, add    & 4.00$\pm$0.00 & 65.48$\pm$19.59 & 68.20$\pm$17.14 & 76.52$\pm$13.84 \\
+LSTM, add   & 4.00$\pm$0.00 & 69.96$\pm$16.36 & 70.96$\pm$12.33 & 76.40$\pm$8.41 \\
+MLP, dot    & 4.00$\pm$0.00 & 42.36$\pm$22.16 & 69.48$\pm$12.12 & 71.44$\pm$21.12 \\
+LSTM, dot   & 4.00$\pm$0.00 & 33.48$\pm$19.28 & 69.64$\pm$12.23 & 75.08$\pm$9.17 \\
+No-TS       & 4.00$\pm$0.00 & 51.12$\pm$22.36 & 70.08$\pm$16.21 & 66.64$\pm$19.82 \\
+No-GNN      & 4.00$\pm$0.00 & 67.52$\pm$17.81 & 68.00$\pm$14.75 & 76.96$\pm$8.81 \\
+\bottomrule
+\end{tabular}
+
+\caption{PLATO ablations: episode return (mean $\pm$ std) on $2\times 3$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_reward_2x3_only_appendix}
+\end{table}
+
+
+% -----------------------
+% Ablations: Reward (4x4 native) [APPENDIX]
+% -----------------------
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.02}
+
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l@{\hspace{2pt}}}
+\toprule
+\multicolumn{5}{c}{$4\times 4$} \\
+\midrule
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, add    & 12.00$\pm$0.00 & 19.76$\pm$9.03  & 230.48$\pm$24.30 & 149.96$\pm$27.58 \\
+LSTM, add   & 12.00$\pm$0.00 & 17.28$\pm$7.84  & 227.96$\pm$21.14 & 152.28$\pm$25.36 \\
+MLP, dot    & 12.00$\pm$0.00 & 20.36$\pm$10.24 & 225.12$\pm$21.12 & 149.36$\pm$24.89 \\
+LSTM, dot   & 12.00$\pm$0.00 & 20.12$\pm$9.66  & 223.88$\pm$24.10 & 148.72$\pm$28.13 \\
+No-TS       & 12.00$\pm$0.00 & 19.68$\pm$8.45  & 205.60$\pm$26.64 & 152.88$\pm$25.97 \\
+No-GNN      & 12.00$\pm$0.00 & 19.44$\pm$8.21  & 232.56$\pm$23.62 & 145.76$\pm$26.66 \\
+\bottomrule
+\end{tabular}
+
+\caption{PLATO ablations: episode return (mean $\pm$ std) on $4\times 4$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_reward_4x4_only_appendix}
+\end{table}
+
+
+% -----------------------
+% Ablations: 4x4 ZS Reward (trained on 2x3 and 3x3) [APPENDIX]
+% -----------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 11.92$\pm$2.32 & 5.52$\pm$9.19   & 65.20$\pm$10.17 & 14.20$\pm$36.75
+                  & 10.00$\pm$2.68 & 5.40$\pm$8.36   & 58.24$\pm$19.84 & 57.72$\pm$17.63 \\
+LSTM, additive     & 11.36$\pm$2.75 & 9.32$\pm$11.51  & 68.48$\pm$14.89 & 42.68$\pm$30.86
+                  & 10.16$\pm$3.02 & 8.24$\pm$12.19  & 42.08$\pm$25.14 & 59.68$\pm$14.72 \\
+MLP, dot-product   & \textbf{13.36$\pm$1.48} & 4.36$\pm$7.90 & 63.48$\pm$23.60 & 23.96$\pm$38.27
+                  & 10.32$\pm$2.11 & 4.16$\pm$5.09   & 51.84$\pm$26.84 & 63.52$\pm$15.21 \\
+LSTM, dot-product  & 10.56$\pm$2.91 & 4.68$\pm$5.62   & 66.80$\pm$14.30 & 26.92$\pm$35.84
+                  & 10.72$\pm$2.38 & 4.80$\pm$5.55   & 40.96$\pm$30.22 & 62.52$\pm$10.45 \\
+No-TS              & 11.12$\pm$2.80 & 5.48$\pm$5.68   & 62.48$\pm$13.71 & 18.44$\pm$37.66
+                  & 9.44$\pm$2.80  & 5.76$\pm$8.49   & 42.12$\pm$25.72 & 52.36$\pm$27.08 \\
+No-GNN             & 12.08$\pm$2.17 & 4.76$\pm$9.15   & 64.72$\pm$17.25 & 26.00$\pm$36.98
+                  & 9.60$\pm$2.83  & 6.60$\pm$11.13  & 45.52$\pm$28.72 & 49.40$\pm$25.60 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: zero-shot episode return on $4\times 4$ (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_4x4_reward_train2x3_appendix}
+\end{table*}
+
+
+% -------------------------
+% Ablations: Burnouts (2x3 + 3x3)
+% -------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 1.06$\pm$0.24 & 1.02$\pm$0.14
+                  & 0.00$\pm$0.00 & 0.08$\pm$0.34 & 2.06$\pm$0.24 & 2.60$\pm$0.53 \\
+LSTM, additive     & 0.00$\pm$0.00 & 0.04$\pm$0.20 & 1.02$\pm$0.14 & 1.00$\pm$0.00
+                  & 0.00$\pm$0.00 & 0.10$\pm$0.30 & 2.04$\pm$0.20 & 2.52$\pm$0.58 \\
+MLP, dot-product   & 0.00$\pm$0.00 & 0.26$\pm$0.44 & 1.02$\pm$0.14 & 1.08$\pm$0.27
+                  & 0.00$\pm$0.00 & 0.18$\pm$0.39 & 2.08$\pm$0.27 & 2.52$\pm$0.50 \\
+LSTM, dot-product  & 0.00$\pm$0.00 & 0.02$\pm$0.14 & 1.02$\pm$0.14 & 1.00$\pm$0.00
+                  & 0.00$\pm$0.00 & 0.06$\pm$0.24 & 2.06$\pm$0.24 & 2.42$\pm$0.50 \\
+No-TS              & 0.00$\pm$0.00 & 0.14$\pm$0.35 & 1.04$\pm$0.20 & 1.06$\pm$0.24
+                  & 0.00$\pm$0.00 & 0.06$\pm$0.31 & 2.04$\pm$0.20 & 2.70$\pm$0.51 \\
+No-GNN             & 0.00$\pm$0.00 & 0.00$\pm$0.00 & 1.04$\pm$0.20 & 1.00$\pm$0.00
+                  & 0.00$\pm$0.00 & 0.10$\pm$0.36 & 2.10$\pm$0.30 & 2.64$\pm$0.53 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: burnouts per episode (mean $\pm$ std) on $2\times 3$ and $3\times 3$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_burnouts_2x3_3x3}
+\end{table*}
+
+
+% ------------------------
+% Ablations: Putouts (2x3 + 3x3)
+% ------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 2.00$\pm$0.00 & 32.74$\pm$9.80 & 35.66$\pm$8.68 & 39.98$\pm$6.76
+                  & 4.00$\pm$0.00 & 3.92$\pm$0.34 & 61.78$\pm$5.34 & 45.48$\pm$9.24 \\
+LSTM, additive     & 2.00$\pm$0.00 & 35.02$\pm$8.11 & 37.40$\pm$6.02 & 39.90$\pm$4.11
+                  & 4.00$\pm$0.00 & 3.90$\pm$0.30 & 63.10$\pm$5.24 & 47.80$\pm$9.22 \\
+MLP, dot-product   & 2.00$\pm$0.00 & 21.44$\pm$10.88 & 36.74$\pm$5.94 & 37.44$\pm$10.26
+                  & 4.00$\pm$0.00 & 3.82$\pm$0.39 & 59.56$\pm$6.18 & 48.20$\pm$8.26 \\
+LSTM, dot-product  & 2.00$\pm$0.00 & 16.76$\pm$9.65 & 36.82$\pm$5.99 & 39.26$\pm$4.49
+                  & 4.00$\pm$0.00 & 3.94$\pm$0.24 & 62.86$\pm$6.53 & 49.34$\pm$8.52 \\
+No-TS              & 2.00$\pm$0.00 & 25.70$\pm$11.15 & 36.72$\pm$7.95 & 35.10$\pm$9.85
+                  & 4.00$\pm$0.00 & 3.94$\pm$0.31 & 56.38$\pm$5.51 & 40.58$\pm$9.55 \\
+No-GNN             & 2.00$\pm$0.00 & 33.76$\pm$8.91 & 36.02$\pm$7.20 & 40.18$\pm$4.33
+                  & 4.00$\pm$0.00 & 3.90$\pm$0.36 & 59.52$\pm$6.33 & 45.84$\pm$10.58 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: putouts per episode (mean $\pm$ std) on $2\times 3$ and $3\times 3$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_putouts_2x3_3x3}
+\end{table*}
+
+
+% -----------------------
+% Ablations: NOOP (2x3 + 3x3)
+% [UPDATED from new console results; PLATO variants only]
+% -----------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{$2\times 3$} & \multicolumn{4}{c}{$3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 25.56$\pm$20.93 & 55.73$\pm$13.18 & 64.70$\pm$5.12 & 55.87$\pm$2.39
+                  & 32.85$\pm$10.19 & 93.53$\pm$3.26 & 49.79$\pm$2.74 & 57.75$\pm$6.78 \\
+LSTM, additive     & 12.84$\pm$17.19 & 56.81$\pm$8.49 & 66.65$\pm$1.97 & 55.87$\pm$2.42
+                  & 14.84$\pm$12.73 & 94.83$\pm$2.96 & 50.41$\pm$2.91 & 56.95$\pm$7.71 \\
+MLP, dot-product   & 23.96$\pm$21.46 & 65.04$\pm$18.11 & 68.02$\pm$1.78 & 58.52$\pm$2.75
+                  & 15.96$\pm$11.68 & 95.35$\pm$2.12 & 46.81$\pm$2.63 & 56.75$\pm$6.83 \\
+LSTM, dot-product  & 19.96$\pm$19.36 & 80.15$\pm$13.05 & 68.95$\pm$1.72 & 55.58$\pm$2.29
+                  & 30.19$\pm$14.49 & 93.49$\pm$4.31 & 51.27$\pm$3.96 & 56.28$\pm$6.61 \\
+No-TS              & 11.11$\pm$16.03 & 68.09$\pm$14.63 & 65.78$\pm$4.29 & 57.91$\pm$3.16
+                  & 15.29$\pm$12.78 & 94.87$\pm$2.60 & 48.58$\pm$2.72 & 55.29$\pm$7.08 \\
+No-GNN             & 15.11$\pm$17.92 & 56.94$\pm$11.30 & 67.43$\pm$1.80 & 55.10$\pm$2.28
+                  & 33.78$\pm$8.39 & 94.75$\pm$2.37 & 49.85$\pm$3.28 & 58.32$\pm$8.08 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: NOOP percentage per episode (mean $\pm$ std) on $2\times 3$ and $3\times 3$.}
+\label{tab:ablate_noop_2x3_3x3}
+\end{table*}
+
+
+\paragraph{Burnouts (Table~\ref{tab:ablate_burnouts_2x3_3x3}).}
+Burnout rates are similar across most variants. On $2\times 3$ Setup~1, MLP+additive and No-GNN achieve the lowest burnouts ($0.00$), while dot-product is slightly higher ($0.02$--$0.26$). On $3\times 3$ Setup~1, all additive-based variants maintain $\leq 0.10$ burnouts, versus $0.18$ for MLP+dot. No-TS shows slightly elevated burnouts in Setup~3 on $3\times 3$ ($2.70$), suggesting team context aids fire management under combined openness.
+
+\paragraph{Putouts (Table~\ref{tab:ablate_putouts_2x3_3x3}).}
+Additive variants generally achieve more putouts than dot-product in Setup~1. On $2\times 3$ S1, additive variants reach $25.70$--$35.02$ putouts versus $16.76$--$21.44$ for dot-product. On $3\times 3$, all additive variants score similarly in S2 ($56.38$--$63.10$), with No-TS showing a notable drop ($56.38$) relative to MLP+additive ($61.78$), consistent with the reward reduction attributed to missing team context.
+
+\paragraph{NOOP Usage (Table~\ref{tab:ablate_noop_2x3_3x3}).}
+NOOP rates vary across conditions. On $2\times 3$ Setup~1, LSTM+dot exhibits the highest NOOP ($80.15\%$), correlating with lower putouts. On $3\times 3$ Setup~1, all variants exceed $93\%$ NOOP, reflecting the sparsity of available tasks. NOOP rates in Setups~2--3 converge across variants ($\approx 46\%$--$68\%$), with No-TS and additive variants slightly lower than dot-product in some conditions.
+
+% ==========================
+% ZERO-SHOT 4x4
+% ==========================
+\subsubsection{Zero-Shot Transfer ($4\times 4$)}
+
+
+% -------------------------
+% Ablations: 4x4 Burnouts (zero-shot)
+% [UPDATED from raw data]
+% -------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 0.52$\pm$0.58 & 3.66$\pm$0.87 & 6.00$\pm$0.00 & 6.54$\pm$0.50
+                  & 1.00$\pm$0.67 & 3.78$\pm$1.04 & 5.88$\pm$0.52 & 6.02$\pm$0.25 \\
+LSTM, additive     & 0.66$\pm$0.69 & 4.40$\pm$0.64 & 6.02$\pm$0.14 & 6.18$\pm$0.39
+                  & 0.96$\pm$0.75 & 4.48$\pm$0.91 & 6.18$\pm$0.44 & 6.02$\pm$0.14 \\
+MLP, dot-product   & \textbf{0.16$\pm$0.37} & 3.68$\pm$0.84 & 6.06$\pm$0.24 & 6.40$\pm$0.49
+                  & 0.92$\pm$0.53 & 3.56$\pm$0.84 & 6.08$\pm$0.53 & 6.00$\pm$0.20 \\
+LSTM, dot-product  & 0.86$\pm$0.73 & 3.44$\pm$0.84 & 6.02$\pm$0.14 & 6.34$\pm$0.48
+                  & 0.82$\pm$0.60 & 3.82$\pm$0.75 & 6.22$\pm$0.65 & 6.00$\pm$0.00 \\
+No-TS              & 0.72$\pm$0.70 & 3.32$\pm$0.94 & 6.02$\pm$0.14 & 6.48$\pm$0.50
+                  & 1.14$\pm$0.70 & 3.54$\pm$0.91 & 6.12$\pm$0.63 & 6.12$\pm$0.39 \\
+No-GNN             & 0.48$\pm$0.54 & 3.62$\pm$0.92 & 6.02$\pm$0.14 & 6.38$\pm$0.49
+                  & 1.10$\pm$0.71 & 3.98$\pm$0.98 & 6.12$\pm$0.63 & 6.10$\pm$0.30 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: zero-shot burnouts on $4\times 4$ (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_4x4_burnouts_merged}
+\end{table*}
+
+
+% ------------------------
+% Ablations: 4x4 Putouts (zero-shot)
+% [UPDATED from raw data]
+% ------------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 6.48$\pm$0.58 & 6.42$\pm$4.17 & 41.58$\pm$5.08 & 17.62$\pm$17.90
+                  & 6.00$\pm$0.67 & 6.48$\pm$3.63 & 38.00$\pm$9.63 & 38.88$\pm$8.64 \\
+LSTM, additive     & 6.34$\pm$0.69 & \textbf{9.06$\pm$5.50} & 43.26$\pm$7.35 & 31.52$\pm$15.06
+                  & 6.04$\pm$0.75 & 8.60$\pm$5.95 & 30.22$\pm$12.23 & 39.86$\pm$7.25 \\
+MLP, dot-product   & \textbf{6.84$\pm$0.37} & 5.86$\pm$3.56 & 40.80$\pm$11.61 & 22.38$\pm$18.65
+                  & 6.08$\pm$0.53 & 5.64$\pm$2.18 & 35.00$\pm$13.07 & 41.76$\pm$7.49 \\
+LSTM, dot-product  & 6.14$\pm$0.73 & 5.78$\pm$2.39 & 42.42$\pm$7.05 & 23.76$\pm$17.48
+                  & 6.18$\pm$0.60 & 6.22$\pm$2.53 & 29.70$\pm$14.65 & 41.26$\pm$5.22 \\
+No-TS              & 6.28$\pm$0.70 & 6.06$\pm$2.25 & 40.26$\pm$6.76 & 19.70$\pm$18.34
+                  & 5.86$\pm$0.70 & 6.42$\pm$3.82 & 30.18$\pm$12.39 & 36.30$\pm$13.20 \\
+No-GNN             & 6.52$\pm$0.54 & 6.00$\pm$4.14 & 41.38$\pm$8.53 & 23.38$\pm$18.01
+                  & 5.90$\pm$0.71 & 7.28$\pm$5.11 & 31.88$\pm$13.90 & 34.80$\pm$12.54 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: zero-shot putouts on $4\times 4$ (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_4x4_putouts_merged}
+\end{table*}
+
+
+% -----------------------
+% Ablations: 4x4 NOOP (zero-shot)
+% [UPDATED from raw data]
+% -----------------------
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{1.4pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l||l|l|l|l@{\hspace{2pt}}}
+\toprule
+& \multicolumn{4}{c||}{Trained on $2\times 3$} & \multicolumn{4}{c}{Trained on $3\times 3$} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c||}{S3}
+        & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, additive      & 26.20$\pm$16.92 & 87.19$\pm$8.08 & 49.44$\pm$3.18 & 58.03$\pm$9.66
+                  & 27.09$\pm$13.14 & 88.70$\pm$6.07 & 46.95$\pm$7.23 & 56.73$\pm$3.70 \\
+LSTM, additive     & 21.18$\pm$12.63 & 76.31$\pm$13.70 & 50.03$\pm$4.36 & 57.92$\pm$5.39
+                  & 19.06$\pm$14.20 & \textbf{74.19$\pm$17.92} & 49.53$\pm$8.83 & 54.01$\pm$2.44 \\
+MLP, dot-product   & 14.57$\pm$17.77 & 84.43$\pm$9.90 & 49.90$\pm$5.41 & 54.84$\pm$7.78
+                  & 31.74$\pm$21.77 & 91.59$\pm$3.71 & 49.93$\pm$8.28 & 54.21$\pm$3.58 \\
+LSTM, dot-product  & 22.65$\pm$17.06 & 87.53$\pm$4.70 & 53.50$\pm$3.51 & 53.84$\pm$7.61
+                  & 22.66$\pm$14.50 & 90.10$\pm$4.24 & 56.37$\pm$7.63 & 52.42$\pm$2.58 \\
+No-TS              & 22.83$\pm$16.08 & 87.28$\pm$6.74 & \textbf{47.68$\pm$3.74} & 57.28$\pm$8.32
+                  & 24.60$\pm$13.84 & 87.28$\pm$9.27 & 50.92$\pm$10.92 & 55.28$\pm$5.19 \\
+No-GNN             & 25.08$\pm$18.07 & 87.96$\pm$6.67 & 49.83$\pm$5.21 & 58.51$\pm$8.14
+                  & 23.87$\pm$13.82 & 87.83$\pm$8.16 & 52.64$\pm$8.34 & 53.73$\pm$6.09 \\
+\bottomrule
+\end{tabular}
+\caption{PLATO ablations: zero-shot NOOP percentage on $4\times 4$ (mean $\pm$ std), grouped by training grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_4x4_noop_merged}
+\end{table*}
+
+\paragraph{Burnouts (Table~\ref{tab:ablate_4x4_burnouts_merged}).}
+In zero-shot $4\times 4$, burnout counts are high across variants in Setups~2--3 ($\approx 6.0$), reflecting the difficulty of fire control at this scale. In Setup~0, trained on $2\times 3$, MLP+dot achieves the lowest burnouts ($0.16\pm0.37$, significant). Trained on $3\times 3$, burnouts in Setups~0--1 are more differentiated: MLP+add ($1.00$) and LSTM+add ($0.96$) are competitive, while No-TS is slightly higher ($1.14$). Dot-product variants show intermediate burnouts in Setup~1.
+
+\paragraph{Putouts (Table~\ref{tab:ablate_4x4_putouts_merged}).}
+Trained on $2\times 3$, LSTM+additive achieves the highest putouts in Setup~1 ($9.06\pm5.50$, significant). In Setup~2, all additive variants are comparable ($40.26$--$43.26$), with No-TS slightly lower ($40.26$) than MLP+add ($41.58$). Trained on $3\times 3$, MLP+additive leads in Setup~2 ($38.00$), while No-TS and No-GNN trail ($30.18$--$31.88$), reinforcing the importance of team context and the GNN critic for larger-scale transfer.
+
+\paragraph{NOOP Usage (Table~\ref{tab:ablate_4x4_noop_merged}).}
+NOOP rates are high in Setup~1 ($\approx 75\%$--$92\%$), reflecting task sparsity. Trained on $3\times 3$, LSTM+additive achieves the lowest NOOP in Setup~1 ($74.19\%$, significant), consistent with its higher putouts in that condition. Trained on $2\times 3$, No-TS achieves the lowest NOOP in Setup~2 ($47.68\%$, significant), though this does not translate to higher reward, suggesting more but less targeted actions.

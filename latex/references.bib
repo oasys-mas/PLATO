@@ -1,0 +1,810 @@
+
+
+@article{student1908probable,
+  title={The Probable Error of a Mean},
+  author={Student},
+  journal={Biometrika},
+  volume={6},
+  number={1},
+  pages={1--25},
+  year={1908}
+}
+
+@book{montgomery2017design,
+  title={Design and Analysis of Experiments},
+  author={Montgomery, Douglas C.},
+  edition={9th},
+  year={2017},
+  publisher={John Wiley \& Sons},
+  address={Hoboken, NJ}
+}
+
+@book{hochberg1987multiple,
+  title={Multiple Comparison Procedures},
+  author={Hochberg, Yosef and Tamhane, Ajit C.},
+  year={1987},
+  publisher={John Wiley \& Sons},
+  address={New York}
+}
+
+@article{demsar2006statistical,
+  title={Statistical Comparisons of Classifiers over Multiple Data Sets},
+  author={Dem{\v{s}}ar, Janez},
+  journal={Journal of Machine Learning Research},
+  volume={7},
+  pages={1--30},
+  year={2006}
+}
+
+@book{cohen1988statistical,
+  title={Statistical Power Analysis for the Behavioral Sciences},
+  author={Cohen, Jacob},
+  edition={2nd},
+  year={1988},
+  publisher={Lawrence Erlbaum Associates},
+  address={Hillsdale, NJ}
+}
+@inproceedings{chen2016collaborative,
+  title={Collaborative human task assignment for open systems},
+  author={Chen, Bin and Eck, Adam and Soh, Leen-Kiat},
+  booktitle={Proceedings of the 2016 International Conference on Autonomous Agents \& Multiagent Systems},
+  pages={1441--1442},
+  year={2016}
+}
+
+@article{jumadinova2013strategic,
+  title={Strategic capability-learning for improved multiagent collaboration in ad hoc environments},
+  author={Jumadinova, Janyl and Dasgupta, Prithviraj and Soh, Leen-Kiat},
+  journal={IEEE Transactions on Systems, Man, and Cybernetics: Systems},
+  volume={44},
+  number={8},
+  pages={1003--1014},
+  year={2013},
+  publisher={IEEE}
+}
+
+@InProceedings{original-omas,
+author="Shehory, Onn",
+editor="Ciancarini, Paolo
+and Wooldridge, Michael J.",
+title="Software Architecture Attributes of Multi-agent Systems",
+booktitle="Agent-Oriented Software Engineering",
+year="2001",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="77--90",
+abstract="Multi-Agent Systems (MAS) introduce a unique software architecture style. MAS developed to date have several common architectural characteristics, even though differences in their design and implementation result in variations in their strengths and weaknesses. In this paper we study software-architectural properties of MAS to support the assessment of their suitability to the solution of computational problems. We present three MAS case-studies to demonstrate architectural properties and their effect on system functionality.",
+isbn="978-3-540-44564-7"
+}
+
+@misc{gcn,
+      title={Semi-Supervised Classification with Graph Convolutional Networks}, 
+      author={Thomas N. Kipf and Max Welling},
+      year={2017},
+      eprint={1609.02907},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1609.02907}, 
+}
+
+@article{aimag_eck,
+	title = {Decision making in open agent systems},
+	volume = {44},
+	issn = {0738-4602, 2371-9621},
+	url = {https://onlinelibrary.wiley.com/doi/10.1002/aaai.12131},
+	doi = {10.1002/aaai.12131},
+	abstract = {Abstract
+            
+              In many real‐world applications of AI, the set of actors and tasks are not constant, but instead change over time. Robots tasked with suppressing wildfires eventually run out of limited suppressant resources and need to temporarily disengage from the collaborative work in order to recharge, or they might become damaged and leave the environment permanently. In a large business organization, objectives and goals change with the market, requiring workers to adapt to perform different sets of tasks across time. We call these multiagent systems (MAS)
+              open agent systems
+              (OASYS), and the
+              openness
+              of the sets of agents and tasks necessitates new capabilities and modeling for decision making compared to planning and learning in
+              closed
+              environments. In this article, we discuss three notions of openness: agent openness, task openness, and type openness. We also review the past and current research on addressing the novel challenges brought about by openness in OASYS. We share lessons learned from these efforts and suggest directions for promising future work in this area. We also encourage the community to engage and participate in this area of MAS research to address critical real‐world problems in the application of AI to enhance our daily lives.},
+	language = {en},
+	number = {4},
+	urldate = {2024-11-12},
+	journal = {AI Magazine},
+	author = {Eck, Adam and Soh, Leen‐Kiat and Doshi, Prashant},
+	month = dec,
+	year = {2023},
+	pages = {508--523},
+	file = {Full Text:C\:\\Users\\alire\\Zotero\\storage\\4IN2IHIY\\Eck et al. - 2023 - Decision making in open agent systems.pdf:application/pdf},
+}
+@article{ptr,
+  title={Pointer networks},
+  author={Vinyals, Oriol and Fortunato, Meire and Jaitly, Navdeep},
+  journal={Advances in neural information processing systems},
+  volume={28},
+  year={2015}
+}
+@inproceedings{henderson2018deep,
+  title={Deep reinforcement learning that matters},
+  author={Henderson, Peter and Islam, Riashat and Bachman, Philip and Pineau, Joelle and Precup, Doina and Meger, David},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={32},
+  number={1},
+  year={2018}
+}
+
+
+@misc{dicg,
+	title = {Deep {Implicit} {Coordination} {Graphs} for {Multi}-agent {Reinforcement} {Learning}},
+	url = {http://arxiv.org/abs/2006.11438},
+	doi = {10.48550/arXiv.2006.11438},
+	abstract = {Multi-agent reinforcement learning (MARL) requires coordination to efficiently solve certain tasks. Fully centralized control is often infeasible in such domains due to the size of joint action spaces. Coordination graph based formalization allows reasoning about the joint action based on the structure of interactions. However, they often require domain expertise in their design. This paper introduces the deep implicit coordination graph (DICG) architecture for such scenarios. DICG consists of a module for inferring the dynamic coordination graph structure which is then used by a graph neural network based module to learn to implicitly reason about the joint actions or values. DICG allows learning the tradeoff between full centralization and decentralization via standard actor-critic methods to significantly improve coordination for domains with large number of agents. We apply DICG to both centralized-training-centralized-execution and centralized-training-decentralized-execution regimes. We demonstrate that DICG solves the relative overgeneralization pathology in predatory-prey tasks as well as outperforms various MARL baselines on the challenging StarCraft II Multi-agent Challenge (SMAC) and traffic junction environments.},
+	urldate = {2025-02-24},
+	publisher = {arXiv},
+	author = {Li, Sheng and Gupta, Jayesh K. and Morales, Peter and Allen, Ross and Kochenderfer, Mykel J.},
+	month = feb,
+	year = {2021},
+	note = {arXiv:2006.11438 [cs]},
+	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Computer Science - Multiagent Systems},
+	file = {Preprint PDF:C\:\\Users\\alire\\Zotero\\storage\\7HV3HT2T\\Li et al. - 2021 - Deep Implicit Coordination Graphs for Multi-agent Reinforcement Learning.pdf:application/pdf;Snapshot:C\:\\Users\\alire\\Zotero\\storage\\GSELHUTY\\2006.html:text/html},
+}
+
+@article{gae,
+  title={High-dimensional continuous control using generalized advantage estimation},
+  author={Schulman, John and Moritz, Philipp and Levine, Sergey and Jordan, Michael and Abbeel, Pieter},
+  journal={arXiv preprint arXiv:1506.02438},
+  year={2015}
+}
+
+@article{dgn,
+	title = {Graph convolutional reinforcement learning},
+	journal = {arXiv preprint arXiv:1810.09202},
+	author = {Jiang, Jiechuan and Dun, Chen and Huang, Tiejun and Lu, Zongqing},
+	year = {2018},
+}
+
+@article{ma2019combinatorial,
+  title={Combinatorial optimization by graph pointer networks and hierarchical reinforcement learning},
+  author={Ma, Qiang and Ge, Suwen and He, Danyang and Thaker, Darshan and Drori, Iddo},
+  journal={arXiv preprint arXiv:1911.04936},
+  year={2019}
+}
+
+@book{kullback1997information,
+  title={Information theory and statistics},
+  author={Kullback, Solomon},
+  year={1997},
+  publisher={Courier Corporation}
+}
+
+
+@inproceedings{gpl,
+	title = {Towards open ad hoc teamwork using graph-based policy learning},
+	isbn = {2640-3498},
+	booktitle = {International conference on machine learning},
+	publisher = {PMLR},
+	author = {Rahman, Muhammad A. and Hopner, Niklas and Christianos, Filippos and Albrecht, Stefano V.},
+	year = {2021},
+	pages = {8776--8786},
+}
+@article{rashid2020monotonic,
+  title={Monotonic value function factorisation for deep multi-agent reinforcement learning},
+  author={Rashid, Tabish and Samvelyan, Mikayel and De Witt, Christian Schroeder and Farquhar, Gregory and Foerster, Jakob and Whiteson, Shimon},
+  journal={Journal of Machine Learning Research},
+  volume={21},
+  number={178},
+  pages={1--51},
+  year={2020}
+}
+@inproceedings{stone2010ad,
+  title={Ad hoc autonomous agent teams: Collaboration without pre-coordination},
+  author={Stone, Peter and Kaminka, Gal and Kraus, Sarit and Rosenschein, Jeffrey},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={24},
+  number={1},
+  pages={1504--1509},
+  year={2010}
+}
+
+
+
+@article{gnn,
+	title = {The graph neural network model},
+	volume = {20},
+	number = {1},
+	journal = {IEEE transactions on neural networks},
+	author = {Scarselli, Franco and Gori, Marco and Tsoi, Ah Chung and Hagenbuchner, Markus and Monfardini, Gabriele},
+	year = {2008},
+	note = {ISBN: 1045-9227
+Publisher: IEEE},
+	pages = {61--80},
+}
+
+
+@article{ppo,
+	title = {Proximal policy optimization algorithms},
+	journal = {arXiv preprint arXiv:1707.06347},
+	author = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg},
+	year = {2017},
+}
+
+@article{mappo,
+	title = {The surprising effectiveness of ppo in cooperative multi-agent games},
+	volume = {35},
+	journal = {Advances in neural information processing systems},
+	author = {Yu, Chao and Velu, Akash and Vinitsky, Eugene and Gao, Jiaxuan and Wang, Yu and Bayen, Alexandre and Wu, Yi},
+	year = {2022},
+	pages = {24611--24624},
+}
+
+
+
+
+
+
+@article{rumelhart1986learning_mlp,
+  title={Learning representations by back-propagating errors},
+  author={Rumelhart, David E and Hinton, Geoffrey E and Williams, Ronald J},
+  journal={nature},
+  volume={323},
+  number={6088},
+  pages={533--536},
+  year={1986},
+  publisher={Nature Publishing Group UK London}
+}
+@article{watkins1992q,
+  title={Q-learning},
+  author={Watkins, Christopher JCH and Dayan, Peter},
+  journal={Machine learning},
+  volume={8},
+  number={3},
+  pages={279--292},
+  year={1992},
+  publisher={Springer}
+}
+@article{wang2024n,
+  title={N-agent ad hoc teamwork},
+  author={Wang, Caroline and Rahman, Muhammad Arrasy and Durugkar, Ishan and Liebman, Elad and Stone, Peter},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={111832--111862},
+  year={2024}
+}
+@inproceedings{yang2022graph,
+  title={Graph pointer neural networks},
+  author={Yang, Tianmeng and Wang, Yujing and Yue, Zhihan and Yang, Yaming and Tong, Yunhai and Bai, Jing},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={36},
+  number={8},
+  pages={8832--8839},
+  year={2022}
+}
+@inproceedings{symes2023entity,
+  title={Entity-based reinforcement learning for autonomous cyber defence},
+  author={Symes Thompson, Isaac and Caron, Alberto and Hicks, Chris and Mavroudis, Vasilios},
+  booktitle={Proceedings of the Workshop on Autonomous Cybersecurity},
+  pages={56--67},
+  year={2023}
+}
+
+@article{shafipour2022line,
+  title={On-line estimators for ad-hoc task execution: learning types and parameters of teammates for effective teamwork},
+  author={Shafipour Yourdshahi, Elnaz and do Carmo Alves, Matheus Aparecido and Varma, Amokh and Soriano Marcolino, Leandro and Ueyama, J{\'o} and Angelov, Plamen},
+  journal={Autonomous Agents and Multi-Agent Systems},
+  volume={36},
+  number={2},
+  pages={45},
+  year={2022},
+  publisher={Springer}
+}
+@article{liao2025dynamic,
+  title={Dynamic Sight Range Selection in Multi-Agent Reinforcement Learning},
+  author={Liao, Wei-Chen and Wu, Ti-Rong and Wu, I and others},
+  journal={arXiv preprint arXiv:2505.12811},
+  year={2025}
+}
+
+@article{lecun2002gradient_cnn,
+  title={Gradient-based learning applied to document recognition},
+  author={LeCun, Yann and Bottou, L{\'e}on and Bengio, Yoshua and Haffner, Patrick},
+  journal={Proceedings of the IEEE},
+  volume={86},
+  number={11},
+  pages={2278--2324},
+  year={2002},
+  publisher={Ieee}
+}
+
+@inproceedings{wolf2020transformers,
+  title={Transformers: State-of-the-art natural language processing},
+  author={Wolf, Thomas and Debut, Lysandre and Sanh, Victor and Chaumond, Julien and Delangue, Clement and Moi, Anthony and Cistac, Pierric and Rault, Tim and Louf, R{\'e}mi and Funtowicz, Morgan and others},
+  booktitle={Proceedings of the 2020 conference on empirical methods in natural language processing: system demonstrations},
+  pages={38--45},
+  year={2020}
+}
+@article{vaswani2017attention,
+  title={Attention is all you need},
+  author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  journal={Advances in neural information processing systems},
+  volume={30},
+  year={2017}
+}
+
+
+
+
+@article{lstm,
+  title={Long short-term memory},
+  author={Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+  journal={Neural computation},
+  volume={9},
+  number={8},
+  pages={1735--1780},
+  year={1997},
+  publisher={MIT press}
+}
+
+
+
+@article{srivastava2014dropout,
+  title={Dropout: a simple way to prevent neural networks from overfitting},
+  author={Srivastava, Nitish and Hinton, Geoffrey and Krizhevsky, Alex and Sutskever, Ilya and Salakhutdinov, Ruslan},
+  journal={The journal of machine learning research},
+  volume={15},
+  number={1},
+  pages={1929--1958},
+  year={2014},
+  publisher={JMLR. org}
+}
+
+
+@inproceedings{he2016deep,
+  title={Deep residual learning for image recognition},
+  author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={770--778},
+  year={2016}
+}
+
+@article{schulman2015high,
+  title={High-dimensional continuous control using generalized advantage estimation},
+  author={Schulman, John and Moritz, Philipp and Levine, Sergey and Jordan, Michael and Abbeel, Pieter},
+  journal={arXiv preprint arXiv:1506.02438},
+  year={2015}
+}
+@article{huberp1964robust,
+  title={Robust estimation of alocation parmneter},
+  author={HuberP, J},
+  journal={AnnMathStatist},
+  volume={35},
+  pages={73--101},
+  year={1964}
+}
+
+@article{bahdanau2014neural,
+  title={Neural machine translation by jointly learning to align and translate},
+  author={Bahdanau, Dzmitry and Cho, Kyunghyun and Bengio, Yoshua},
+  journal={arXiv preprint arXiv:1409.0473},
+  year={2014}
+}
+@article{kool2018attention,
+  title={Attention, learn to solve routing problems!},
+  author={Kool, Wouter and Van Hoof, Herke and Welling, Max},
+  journal={arXiv preprint arXiv:1803.08475},
+  year={2018}
+}
+
+@article{kingma2014adam,
+  title={Adam: A method for stochastic optimization},
+  author={Kingma, Diederik P and Ba, Jimmy},
+  journal={arXiv preprint arXiv:1412.6980},
+  year={2014}
+}
+@article{abadi2025challenges,
+  title={Challenges in Credit Assignment for Multi-Agent Reinforcement Learning in Open Agent Systems},
+  author={Abadi, Alireza Saleh and Soh, Leen-Kiat},
+  journal={arXiv preprint arXiv:2510.27659},
+  year={2025}
+}
+
+@inproceedings{akiba2019optuna,
+  title={Optuna: A next-generation hyperparameter optimization framework},
+  author={Akiba, Takuya and Sano, Shotaro and Yanase, Toshihiko and Ohta, Takeru and Koyama, Masanori},
+  booktitle={Proceedings of the 25th ACM SIGKDD international conference on knowledge discovery \& data mining},
+  pages={2623--2631},
+  year={2019}
+}
+
+@inproceedings{eck2020scalable,
+  title={Scalable decision-theoretic planning in open and typed multiagent systems},
+  author={Eck, Adam and Shah, Maulik and Doshi, Prashant and Soh, Leen-Kiat},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume={34},
+  pages={7127--7134},
+  year={2020}
+}
+@article{welch1947generalization,
+  title={The generalization of ‘STUDENT'S’problem when several different population varlances are involved},
+  author={Welch, Bernard L},
+  journal={Biometrika},
+  volume={34},
+  number={1-2},
+  pages={28--35},
+  year={1947},
+  publisher={Oxford University Press}
+}
+
+
+@inproceedings{foerster2018counterfactual_coma,
+  title={Counterfactual multi-agent policy gradients},
+  author={Foerster, Jakob and Farquhar, Gregory and Afouras, Triantafyllos and Nardelli, Nantas and Whiteson, Shimon},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={32},
+  number={1},
+  year={2018}
+}
+@article{patino2025inaugural,
+  title={Inaugural MOASEI Competition at AAMAS'2025: A Technical Report},
+  author={Patino, Ceferino and Billings, Tyler J and Abadi, Alireza Saleh and Redder, Daniel and Eck, Adam and Doshi, Prashant and Soh, Leen-Kiat},
+  journal={arXiv preprint arXiv:2507.05469},
+  year={2025}
+}
+
+
+@article{kipf2016semi,
+  title={Semi-supervised classification with graph convolutional networks},
+  author={Kipf, Thomas N and Welling, Max},
+  journal={arXiv preprint arXiv:1609.02907},
+  year={2016}
+}
+
+
+@article{hu2020provable,
+  title={Provable benefit of orthogonal initialization in optimizing deep linear networks},
+  author={Hu, Wei and Xiao, Lechao and Pennington, Jeffrey},
+  journal={arXiv preprint arXiv:2001.05992},
+  year={2020}
+}
+@article{zaheer2017deep,
+  title={Deep sets},
+  author={Zaheer, Manzil and Kottur, Satwik and Ravanbakhsh, Siamak and Poczos, Barnabas and Salakhutdinov, Russ R and Smola, Alexander J},
+  journal={Advances in neural information processing systems},
+  volume={30},
+  year={2017}
+}
+@article{lowe2017multi,
+  title={Multi-agent actor-critic for mixed cooperative-competitive environments},
+  author={Lowe, Ryan and Wu, Yi I and Tamar, Aviv and Harb, Jean and Pieter Abbeel, OpenAI and Mordatch, Igor},
+  journal={Advances in neural information processing systems},
+  volume={30},
+  year={2017}
+}
+@inproceedings{anilmohito,
+  title={MOHITO: Multi-Agent Reinforcement Learning using Hypergraphs for Task-Open Systems},
+  author={Anil, Gayathri and Doshi, Prashant and Redder, Daniel Alan and Eck, Adam and Soh, Leen-Kiat},
+  booktitle={The 41st Conference on Uncertainty in Artificial Intelligence},
+  year={2025}
+
+}
+@article{zhang2021survey,
+  title={A survey on multi-task learning},
+  author={Zhang, Yu and Yang, Qiang},
+  journal={IEEE transactions on knowledge and data engineering},
+  volume={34},
+  number={12},
+  pages={5586--5609},
+  year={2021},
+  publisher={IEEE}
+}
+@article{narvekar2020curriculum,
+  title={Curriculum learning for reinforcement learning domains: A framework and survey},
+  author={Narvekar, Sanmit and Peng, Bei and Leonetti, Matteo and Sinapov, Jivko and Taylor, Matthew E and Stone, Peter},
+  journal={Journal of Machine Learning Research},
+  volume={21},
+  number={181},
+  pages={1--50},
+  year={2020}
+}
+@article{ribeiro2019multitask,
+  title={Multi-task learning and catastrophic forgetting in continual reinforcement learning},
+  author={Ribeiro, Joao and Melo, Francisco S and Dias, Joao},
+  journal={arXiv preprint arXiv:1909.10008},
+  year={2019}
+}
+@article{kravchenko2024limitations,
+  title={The limitations of automatically generated curricula for continual learning},
+  author={Kravchenko, Anna and Cusack, Rhodri},
+  journal={Plos one},
+  volume={19},
+  number={4},
+  pages={e0290706},
+  year={2024},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
+
+
+@article{musaddiq2023reinforcement,
+  title={Reinforcement-learning-based routing and resource management for Internet of Things environments: Theoretical perspective and challenges},
+  author={Musaddiq, Arslan and Olsson, Tobias and Ahlgren, Fredrik},
+  journal={Sensors},
+  volume={23},
+  number={19},
+  pages={8263},
+  year={2023},
+  publisher={MDPI}
+}
+
+@article{gru,
+  title={Empirical evaluation of gated recurrent neural networks on sequence modeling},
+  author={Chung, Junyoung and Gulcehre, Caglar and Cho, KyungHyun and Bengio, Yoshua},
+  journal={arXiv preprint arXiv:1412.3555},
+  year={2014}
+}
+
+
+
+@inproceedings{lee2019set,
+  title={Set transformer: A framework for attention-based permutation-invariant neural networks},
+  author={Lee, Juho and Lee, Yoonho and Kim, Jungtaek and Kosiorek, Adam and Choi, Seungjin and Teh, Yee Whye},
+  booktitle={International conference on machine learning},
+  pages={3744--3753},
+  year={2019},
+  organization={PMLR}
+}
+
+
+@article{tay2023efficient,
+  title={Efficient Transformers: A Survey},
+  author={Tay, Yi and Dehghani, Mostafa and Bahri, Dara and Metzler, Donald},
+  journal={ACM Computing Surveys},
+  volume={55},
+  number={6},
+  pages={1--28},
+  year={2023}
+}
+
+@inproceedings{perez2018film,
+  title={Film: Visual reasoning with a general conditioning layer},
+  author={Perez, Ethan and Strub, Florian and De Vries, Harm and Dumoulin, Vincent and Courville, Aaron},
+  booktitle={Proceedings of the AAAI conference on artificial intelligence},
+  volume={32},
+  number={1},
+  year={2018}
+}
+
+
+
+@article{flood1956traveling,
+  title={The traveling-salesman problem},
+  author={Flood, Merrill M},
+  journal={Operations research},
+  volume={4},
+  number={1},
+  pages={61--75},
+  year={1956},
+  publisher={INFORMS}
+}
+
+
+
+
+
+
+
+
+@book{Lam94,
+  author = {Leslie Lamport},
+  title = {{\LaTeX}: A Document Preparation System},
+  publisher = {Addison-Wesley},
+  address = {Reading, MA},
+  edition = {2nd},
+  year = {1994}
+}
+
+@article{WoJe95,
+  title = {Intelligent Agents: Theory and Practice},
+  author = {Wooldridge, Michael J. and Jennings, Nicholas R.},
+  journal = {The Knowledge Engineering Review},
+  volume = {10},
+  number = {2},
+  pages = {115--152},
+  year = {1995}
+}
+
+@article{GrKr96,
+  title = {Collaborative Plans for Complex Group Action},
+  author = {Grosz, Barbara J. and Kraus, Sarit},
+  journal = {Artificial Intelligence},
+  volume = {86},
+  number = {2},
+  pages = {269--357},
+  year = {1996}
+}
+
+@Techreport{Har78,
+  author =       "David Harel",
+  year =         "1978",
+  title =        "Logics of programs: axiomatics and descriptive power",
+  institution =  "Massachusetts Institute of Technology",
+  type =         "MIT Research Lab Technical Report",
+  number =       "TR-200",
+  address =      "Cambridge, MA",
+  month =        "",
+  note =         ""
+}
+
+@Phdthesis{Cla85,
+  author =       "Kenneth L. Clarkson",
+  year =         "1985",
+  title =        "Algorithms for Closest-Point Problems (Computational Geometry)",
+  school =       "Stanford University",
+  address =      "Palo Alto, CA",
+  note =         "UMI Order Number: AAT 8506171",
+  type =         "",
+  month =        ""
+}
+
+@misc{Oba08,
+  author        = "Barack Obama",
+  year          = "2008",
+  title         = "A More Perfect Union",
+  howpublished  = "Video",
+  day           = "5",
+  url           = "http://video.google.com/videoplay?docid=6528042696351994555",
+  month         = mar,
+  lastaccessed  = "March 21, 2008",
+  note          =  ""
+}
+
+@misc{Sci09,
+  author =       "Joseph Scientist",
+  year =         "2009",
+  title =        "The fountain of youth",
+  note =         "Patent No. 12345, Filed July 1st., 2008, Issued Aug. 9th., 2009",
+  url =          "",
+  howpublished = "",
+  month =        aug,
+  lastaccessed = ""
+}
+
+@ArtifactDataset{AnMC13,
+ author    =  {Sam Anzaroot and Andrew McCallum},
+ title     =  {{UMass} Citation Field Extraction Dataset},
+ year      = 2013,
+ organization = {University of Massachusetts},
+ url       =
+    {http://www.iesl.cs.umass.edu/data/data-umasscitationfield},
+ lastaccessed = {May 27, 2019}
+}
+
+@inproceedings{Hag1993,
+title        = {Maintaining Discrete Probability Distributions Optimally},
+author       = {Hagerup, Torben and Mehlhorn, Kurt and Munro, J. Ian},
+booktitle    = {Proceedings of the 20th International Colloquium on Automata, Languages and Programming},
+series       = {Lecture Notes in Computer Science},
+volume       = {700},
+pages        = {253--264},
+year         = {1993},
+publisher    = {Springer-Verlag},
+address      = {Berlin}
+}
+
+@Book{Knu97,
+  author =       "Donald E. Knuth",
+  title =        "The Art of Computer Programming, Vol. 1: Fundamental Algorithms",
+  publisher =    "Addison Wesley",
+  year =         "1997",
+  address =      "Reading, Massachusetts",
+  edition =      "3rd",
+  editor =       "",
+  volume =       "",
+  number =       "",
+  series =       "",
+  month =        "",
+  note =         ""
+}
+
+@MASTERSTHESIS{Ani03,
+author = {David A. Anisi},
+title = {Optimal Motion Control of a Ground Vehicle},
+school = {Royal Institute of Technology (KTH), Stockholm, Sweden},
+intitution = {FOI-R-0961-SE, Swedish Defence Research Agency (FOI)},
+year = {2003},
+}
+
+
+
+
+@incollection{Shehory00,
+ author = {O. Shehory},
+ booktitle = {1st International Workshop on Agent-Oriented Software Engineering, Revised papers},
+ pages = {77--89},
+ publisher = {ACM},
+ title = {Software Architecture Attributes of Multi-agent Systems},
+ year = {2000}
+}
+
+@inproceedings{Calmet04,
+ author = {J. Calmet and A. Daemi and R. Endsuleit and T. Mie},
+ booktitle = {Engineering Societies in the Agents World IV, LNCS},
+ pages = {81--92},
+ title = {A Liberal Approach to Openness in Societies of Agents},
+ volume = {3071},
+ year = {2004}
+}
+
+@article{Jumadinov14,
+ author = {J. Jumadinova and P. Dasgupta and and L.-K. Soh},
+ journal = {IEEE Trans. Systems, Man, \& Cybernetics-Part A},
+ number = {8},
+ pages = {1003--1014},
+ title = {Strategic Capability-Learning for Improved Multi-agent Collaboration in Ad-hoc Environments},
+ volume = {44},
+ year = {2014}
+}
+
+@inproceedings{Jamroga13,
+ author = {W. Jamroga and A. Meski and M. Szreter},
+ booktitle = {GandALF},
+ pages = {224--239},
+ title = {Modularity and Openness in Modeling Multi-Agent Systems},
+ year = {2013}
+}
+@inproceedings{Chandrasekaran,
+ author = {Chandrasekaran, Muthukumaran and Eck, Adam and Doshi, Prashant and Soh, Leenkiat},
+ booktitle = {UAI'16},
+ numpages = {10},
+ pages = {82--91},
+ publisher = {AUAI Press},
+ title = {Individual Planning in Open and Typed Agent Systems},
+ year = {2016}
+}
+
+
+@inproceedings{Kakarlapudi22,
+ author = {Kakarlapudi, Anirudh and Anil, Gayathri and Eck, Adam and Doshi, Prashant and Soh, Leen-Kiat},
+ booktitle = {UAI},
+ pages = {938--948},
+ title = {Decision-theoretic planning with communication in open multiagent systems},
+ year = {2022}
+}
+
+@incollection{Littman,
+ author = {Michael L. Littman},
+ booktitle = {ICML},
+ publisher = {PMLR},
+ pages = {157-163},
+ title = {Markov games as a framework for multi-agent reinforcement learning},
+ year = {1994}
+}
+@article{Shapley,
+ author = {L. S. Shapley },
+ doi = {10.1073/pnas.39.10.1095},
+ eprint = {https://www.pnas.org/doi/pdf/10.1073/pnas.39.10.1095},
+ journal = {Proceedings of the National Academy of Sciences},
+ number = {10},
+ pages = {1095-1100},
+ title = {Stochastic Games*},
+ url = {https://www.pnas.org/doi/abs/10.1073/pnas.39.10.1095},
+ volume = {39},
+ year = {1953}
+}
+@inproceedings{cohen2017open,
+  title={Open decentralized pomdps},
+  author={Cohen, Jonathan and Dibangoye, Jilles-Steeve and Mouaddib, Abdel-Illah},
+  booktitle={2017 IEEE 29th International Conference on Tools with Artificial Intelligence (ICTAI)},
+  pages={977--984},
+  year={2017},
+  organization={IEEE}
+}
+
+@article{relu_agarap2018deep,
+  title={Deep learning using rectified linear units (relu)},
+  author={Agarap, Abien Fred},
+  journal={arXiv preprint arXiv:1803.08375},
+  year={2018}
+}
+@inproceedings{leakyrelu_maas2013rectifier,
+  title={Rectifier nonlinearities improve neural network acoustic models},
+  author={Maas, Andrew L and Hannun, Awni Y and Ng, Andrew Y and others},
+  booktitle={Proc. icml},
+  volume={30},
+  pages={3},
+  year={2013},
+  organization={Atlanta, GA}
+}

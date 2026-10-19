@@ -1,0 +1,84 @@
+
+We ablate four PLATO design choices: the actor encoder-decoder (MLP~\cite{rumelhart1986learning_mlp} vs.\ LSTM~\cite{lstm}), the pointer scoring function (additive attention~\cite{bahdanau2014neural} vs.\ dot-product), team statistics, and the GNN critic. Table~\ref{tab:ablate_reward_stacked_3x3_4x4} shows the results (details in Appendix~A.10). No-TS and No-GNN denote MLP+additive variants with team statistics or the GNN critic removed, respectively.
+
+%The goal is to test whether temporal memory improves performance as task and agent sets vary, and how learned compatibility in the scorer beyond similarity-based pointing impacts the performance, respectively. All variants share the same critic, training objective, and hyperparameters, isolating the effect of each component. LSTM-based implementations use temporal memory while MLP-based ones do not. Additive-based implementations use learned compatibility in the scorer while dot-product-based ones use similarity in the projected embedding space. 
+
+
+
+
+
+
+% -----------------------
+% Ablations: Reward (3x3) + 4x4 Reward (zero-shot, trained on 3x3)
+% -----------------------
+\begin{table}
+\centering
+\small
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.02}
+
+% -------- 3x3 --------
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l@{\hspace{2pt}}}
+\toprule
+\multicolumn{5}{c}{Trained and tested on $3\times 3$} \\
+\midrule
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, add    & 8.00$\pm$0.00 & 7.68$\pm$1.36 & 115.44$\pm$10.82 & 81.76$\pm$19.20 \\
+LSTM, add   & 8.00$\pm$0.00 & 7.60$\pm$1.21 & 118.12$\pm$10.58 & 86.56$\pm$19.23 \\
+MLP, dot    & 8.00$\pm$0.00 & 7.28$\pm$1.55 & 110.96$\pm$12.55 & 87.36$\pm$17.19 \\
+LSTM, dot   & 8.00$\pm$0.00 & 7.76$\pm$0.96 & 117.60$\pm$13.24 & 89.84$\pm$17.78 \\
+No-TS       & 8.00$\pm$0.00 & 7.76$\pm$1.25 & 104.68$\pm$11.05 & 71.76$\pm$19.83 \\
+No-GNN      & 8.00$\pm$0.00 & 7.60$\pm$1.46 & 110.84$\pm$12.87 & 82.40$\pm$21.91 \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+
+% -------- train 3x3, test 4x4 --------
+\begin{tabular}{@{\hspace{2pt}}l|l|l|l|l@{\hspace{2pt}}}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $4\times 4$} \\
+\midrule
+Variant & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+MLP, add    & 10.00$\pm$2.68 & 5.40$\pm$8.36 & 58.24$\pm$19.84 & 57.72$\pm$17.63 \\
+LSTM, add   & 10.16$\pm$3.02 & 8.24$\pm$12.19 & 42.08$\pm$25.14 & 59.68$\pm$14.72 \\
+MLP, dot    & 10.32$\pm$2.11 & 4.16$\pm$5.09 & 51.84$\pm$26.84 & 63.52$\pm$15.21 \\
+LSTM, dot   & 10.72$\pm$2.38 & 4.80$\pm$5.55 & 40.96$\pm$30.22 & 62.52$\pm$10.45 \\
+No-TS       & 9.44$\pm$2.80 & 5.76$\pm$8.49 & 42.12$\pm$25.72 & 52.36$\pm$27.08 \\
+No-GNN      & 9.60$\pm$2.83 & 6.60$\pm$11.13 & 45.52$\pm$28.72 & 49.40$\pm$25.60 \\
+\bottomrule
+\end{tabular}
+
+\caption{PLATO ablations: episode return (mean $\pm$ std) on $3\times 3$ and zero-shot episode return on $4\times 4$ (mean $\pm$ std) when trained on $3\times 3$. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha\approx0.0083$).}
+\label{tab:ablate_reward_stacked_3x3_4x4}
+\end{table}
+
+
+% ==========================
+% ANALYSIS
+% ==========================
+
+
+
+
+\textbf{Does temporal memory improve task selection under openness and zero-shot?} The impact of temporal memory is marginal. On $3\times 3$, MLP+additive and LSTM+additive achieve comparable returns (S2: $115.44$ vs $118.12$; S3: $81.76$ vs $86.56$), with neither variant consistently dominating in zero-shot $4\times 4$. We adopt MLP+additive as our primary variant for its lower computational overhead with comparable performance.
+
+\textbf{Does learned compatibility improve task selection under openness?} Additive attention provides a clear advantage under moderate openness: on $2\times 3$ S1, additive variants score $65.48$/$69.96$ versus dot-product $42.36$/$33.48$ (see Appendix~A.10). At $3\times 3$ the gap narrows (S2: $115.44$ vs $110.96$), with both scorers competitive at larger scale. The learned compatibility function via $W_q$, $W_K$, and $v$ proves more robust when task and agent sets vary, particularly at lower scales where openness is more pronounced.
+
+\textbf{Does team context aid task selection under openness?} Removing team statistics consistently reduces performance across grids. On $2\times 3$ S1, reward falls from $65.48$ to $51.12$; on $3\times 3$ S2 from $115.44$ to $104.68$; and under zero-shot $4\times 4$ (trained on $3\times 3$) S2 from $58.24$ to $42.12$. The fixed-size aggregation (mean, variance, min, max over $N^t$) provides a reliable team context independent of agent count, which is essential under AO.
+
+\textbf{Does a graph-structured critic improve generalization?} The GNN critic's benefit is most pronounced under zero-shot transfer. On native $3\times 3$, removing it reduces S2 reward modestly ($115.44 \to 110.84$). Under zero-shot to $4\times 4$ (trained on $3\times 3$), the degradation is larger: S2 drops $58.24 \to 45.52$ and S3 drops $57.72 \to 49.40$. The graph-structured value function captures structural team dependencies that support generalization to unseen grid scales.
+
+
+%\paragraph{Q1: Does temporal memory improve task selection under openness and zero-shot?}
+%Temporal memory yields selective gains. MLP+additive is stronger on $2\times 3$ across S1--S3, while on $3\times 3$ and zero-shot $4\times 4$ the LSTM variant mainly helps in the most challenging Setup 3 (combined TO and AO), consistent with memory supporting coordination when tasks and agent availability change rapidly (Tables~\ref{tab:ablate_reward_stacked_2x3_3x3}, \ref{tab:ablate_4x4_reward_stacked}).
+
+%\paragraph{Q2: Does learned compatibility improve task selection under openness?}
+%Additive attention consistently outperforms dot-product across grids and in zero-shot, while dot-product often degrades sharply under higher openness (Tables~\ref{tab:ablate_reward_stacked_2x3_3x3}, \ref{tab:ablate_4x4_reward_stacked}). This indicates that openness requires a scorer that can model task-agent compatibility, not simply embedding similarity.
+
+%\paragraph{Implications for addressing openness.}
+%We have clear evidence that additive attention is the more reliable scorer: it learns a compatibility function via $W_q$, $W_K$, and $v$, which is more robust to shifting task sets and agent availability than dot-product similarity. However, the impact of temporal memory in handling openness is less clear: an MLP encoder is sufficient for moderate openness, but an LSTM can be beneficial under combined TO and AO, especially in a zero-shot training generalization scenario.
+
+

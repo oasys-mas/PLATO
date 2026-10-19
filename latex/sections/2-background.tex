@@ -1,0 +1,94 @@
+
+
+%paragraph 1 overview:
+
+%We begin with an explanation of open agent systems (OASYS). We discuss how task open Markov games are modeled in prior work, and finally, introduce the network components we use for PLATO.
+
+
+
+
+%paragraph 1 OASYS:
+\subsection{Open Agent Systems (OASYS)}\label{oasys}
+
+Openness in multi-agent systems refers to environments where either agents or tasks can change over time. A recent survey \cite{aimag_eck} and earlier discussions \cite{Shehory00,Calmet04,Jumadinov14} identify three main forms: (1) \emph{Agent openness (AO)} occurs when agents join or leave the system, altering team composition and available capabilities; (2) \emph{Task openness (TO)} arises when tasks appear or disappear during operation, requiring agents to adapt to new or vanishing opportunities; and (3) \emph{Frame openness (FO)} refers to changes in agents' internal configurations--e.g., goals, preferences, or capabilities, redefining how agents perceive and interact in the environment. 
+%These dynamics stand in contrast to closed systems with fixed agents and tasks, where policies can assume static structures.
+
+Among the three categories, AO has received the most attention in prior work. It was first defined over two decades ago as the addition of agents beyond the initial set \cite{original-omas}, and later refined as the complexity of transforming a system to add or remove an agent \cite{Jamroga13}. Subsequent studies showed that explicitly reasoning about agent presence improves coordination and system behavior \cite{Chandrasekaran,cohen2017open,aimag_eck,Kakarlapudi22}. 
+
+%Work on open agent systems was further expanded through models that capture rates at which agents and tasks join or leave the system \cite{jumadinova2013strategic,chen2016collaborative}. 
+
+By comparison, TO is less studied than AO, and joint AO+TO settings are rarely addressed in a single learning framework. Some work models task arrivals and departures alongside agent dynamics \cite{jumadinova2013strategic,chen2016collaborative}, and in MARL, MOHITO explicitly addresses TO \cite{anilmohito}. Many domains exhibit exogenous TO (e.g., lightning ignitions) while the agent set can also change online, requiring policies that remain well-defined under both forms of openness. Related analysis finds that such openness-driven changes can destabilize learning signals under standard MARL pipelines, motivating architectures that remain robust under changing agent and task sets \cite{abadi2025challenges}.
+
+
+
+
+%By comparison, TO remains relatively underexplored. TO is particularly challenging because tasks often emerge from exogenous factors—%e.g.,  new wildfires caused by lightning strikes—that may not be predictable or modeled in advance.
+
+While FO captures deeper behavioral and cognitive variability, AO and TO make the environment structure dynamic fundamentally. Consequently, our work focuses on AO and TO, which directly determine the system’s composition and coordination patterns and leave FO for future work. 
+%TODO Not sure where you want it but here \cite{anil2025mohito}
+
+\subsection{Task Open Markov Games}
+\label{sec:tao-mg}
+\noindent Task-Open Markov Games model stochastic multi-agent decision-making problems, extending Markov games \cite{Littman} for task openness \cite{anilmohito}. A TaO-MG is defined as:
+
+$$
+\text{TaO-MG} \triangleq \langle {M}, X, \Psi \rangle 
+$$
+
+\noindent where $\bullet\ M$ the base model, is a Markov game, where $N$ is the set of agents, $S$ the state space, $A_i$ the action space of agent $i$, $T: S \times \prod_{i \in N} A_i \to \Delta(S)$ the transition function, $R_i: S \times \prod_{i \in N} A_i \to \mathbb{R}$ the reward function for agent $i$, $\gamma \in [0,1)$ the discount factor, and $s_0$ the initial state. $\bullet\ X$ is the multiset of current tasks; $\bullet\ \Psi$ is a generator function whose components, $(\Psi_S,\Psi_A,\Psi_T,\Psi_R)$ for a MG, adapt $M^t$ to $M^{t+1}$ for a new set of tasks, $X^{t+1}$, at time $t+1$. 
+%This allows for adaptable modeling of games where tasks cause arbitrary, but deterministic change to a problem.
+
+Reinforcement learning in a TaO-MG constitutes each agent $i\in N$ learning a policy $\pi_i$ that maximizes that agent's expected sum of discounted rewards,
+
+$$
+\mathbb{E}_{\tau\sim\pi} \left [ \sum^\infty_{t=0} \gamma^t R^t_{i}(s^t,\mathbf{a}^t | s=s_0) \right ],
+$$
+
+\noindent where trajectories are in the context of the current model, $\tau=\langle s^t,\mathbf{a}^t,X^t\rangle$, and $R_i^t=\Psi_R(R_i^{t-1},X^t)$. 
+This formalization makes task-driven changes explicit, but it leaves open how policies should act over a variable task set (and does not capture agent openness), motivating our TaAgO-MG extension and set-conditioned action selection in Section~\ref{sec:open-mas}.
+
+
+% \subsection{Markov Games}\label{markovgames}
+
+% Markov games, also known as stochastic games, generalize Markov decision processes (MDPs) to the multi-agent setting. A Markov game is defined as
+% \[
+% M = \langle N, S, \{A_i\}_{i \in N}, T, \{R_i\}_{i \in N}, \gamma, s_0 \rangle,
+% \]
+% where $N$ is the set of agents, $S$ the state space, $A_i$ the action space of agent $i$, $T: S \times \prod_{i \in N} A_i \to \Delta(S)$ the transition function, $R_i: S \times \prod_{i \in N} A_i \to \mathbb{R}$ the reward function for agent $i$, $\gamma \in [0,1)$ the discount factor, and $s_0$ the initial state. At each timestep, all agents select actions simultaneously, the environment transitions to a new state according to $T$, and each agent receives an individual reward.
+
+% This framework captures both cooperative and competitive dynamics depending on the reward functions. In cooperative MARL, a common reward $R$ is often shared across all agents, while in competitive or mixed settings, agents optimize their own objectives. 
+
+\subsection{Pointer Networks}\label{pointer_background}
+
+Pointer networks \cite{ptr} are sequence-to-sequence models that generate outputs by selecting positions from the input rather than symbols from a fixed vocabulary (e.g., they do not require a predefined maximum input or output dimension). This makes them well suited for problems where the output size depends on the input size, such as combinatorial optimization or structured selection tasks. This property is directly relevant for OASYS: TO changes the set of selectable tasks, while AO changes the set of agents that conditions coordination. PLATO leverages this concept and selects tasks by scoring the currently available tasks directly, such that the action distribution matches the current task set instead of fixed action indices. That is, the scoring is conditioned on the current team context, so selections adapt when agents enter or leave.
+
+Now we provide a brief formal definition of a pointer network \cite{ptr}. Let $F=\{e_1,\dots,e_{|F|}\}$ be the embeddings of the input elements produced by an encoder. A pointer network may output a sequence of selections; at decoder step $k$, the decoder has state $h^{k}$ and assigns each input element $j$ a score: ${u^{k}_{j}} = v^\top \tanh(W_e e_j + W_h h^{k})$  where  $W_e \in \mathbb{R}^{d \times |e|}$ and $W_h \in \mathbb{R}^{d \times |h|}$ project into a shared dimension $d$; and $v \in \mathbb{R}^{d}$ maps the compatibility vector to a scalar score. Normalizing yields a SOFTMAX-like distribution over input indices, $p(j \mid h^{k}) = \frac{\exp(u^{k}_{j})}{\sum_{\ell=1}^{|F|} \exp(u^{k}_{\ell})}$.  As $F$ changes, the currently available elements are encoded and  re-normalized over the updated set such that the output distribution always matches $F$. In MARL, one can use a single decoding step per environment timestep $t$, where each agent forms a query $q^t$ that summarizes its context (e.g., current team statistics) and scores (pointing to) the task embeddings ${e_j^t}$ via additive attention \cite{bahdanau2014neural}, yielding a team-aware distribution over the currently available tasks.
+
+
+
+
+%unecessary
+%As with most network architectures, a bias term $b\in \mathbb{R}^{|h|}$ may be included yielding,
+%\[
+%u_i^t = v^\top \tanh(W_e e_i + W_s s^t + \mu).
+%\]
+%This bias captures an offset in the shared space. This is the version we use.
+\noindent 
+
+
+%we can leverage additive attention \cite{additive-atten} by letting the context vector $h^t$ summarize the current agent set, since scores depend jointly on $h^k$ and each task embedding, task selection conditioned by changes in the changing agents. 
+
+%This may not even be needed...
+% \subsection{Graph Neural Networks}\label{GNN}
+% Graph Neural Networks (GNNs) \cite{gnn} are neural networks which operate on an input graph of variable node and edge count. This functions by message passing, convolution \cite{gcn} or attention \cite{gat}, between fixed-length node features. The unbounded graph shape makes this convenient for openness, so most existing AO and TO approaches adopt it,.
+
+
+%offer a flexible framework to model multi-agent interactions in variable-sized groups by representing agents as nodes in a graph. In a GNN-based approach, edges (or an adjacency function) define which agents interact, and message-passing or convolution operations allow each agent to aggregate information from its neighbors. This graph-based representation naturally adapts when the team composition or interaction topology changes, without requiring a fixed input size. 
+%Several prior MARL approaches have leveraged GNNs to address aspects of openness; however, most focus on only one form of openness, typically agent or task openness, rather than capturing multiple facets simultaneously. Moreover, they still impose structural bounds or simplifying assumptions that limit true openness.
+
+%Several prior MARL approaches have attempted to handle aspects of openness, though each has limitations. In summary, they still impose bounds or assumptions that limit true openness. 
+
+
+%TODO, discuss in EXPERIMENTS.
+%\subsection{NOOP Convergence}\label{noop}
+%A  challenge in OASYS is the emergence of \emph{NO-OP} local optima, where some agents converge to always choosing the NOOP action. This can arise because remaining idle preserves resources, avoids the risk of negative rewards, or, in some episodes, still yields high returns when teammates carry the workload and the team reward is shared. Moreover, since NOOP is a persistent option while other tasks appear and disappear, it can be perceived as a safe bet. Although such strategies may appear advantageous locally, they represent degenerate equilibria that stall coordination and undermine the system’s overall performance.

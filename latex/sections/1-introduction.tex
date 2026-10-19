@@ -1,0 +1,57 @@
+In many real-world multi-agent systems (MAS), the world does not remain fixed while agents are operating. New tasks emerge unpredictably, agents may leave or join mid-operation and even their goals and capabilities can change. Consider a wildfire response scenario, where fires can ignite, be suppressed, or burn out, spread unpredictably across the landscape, and where firefighters may join or leave as their suppressant runs out or their availability changes. This dynamic nature, known broadly as openness \cite{aimag_eck}, defies the common assumptions of multi-agent reinforcement learning (MARL), where the sets of agents and tasks are instead assumed to be fixed during training and execution. Systems with these characteristics are referred to as \emph{open} agent systems (OASYS). Two common forms of openness \cite{aimag_eck} are agent openness (AO), where agents enter or leave, and task openness (TO), where tasks appear or disappear. Our work focuses on handling both AO and TO together.
+
+
+Handling openness is critical for robust, scalable deployment of MARL in practical settings because systems must continue to perform even as their composition changes. The challenge is that openness causes the underlying decision problem to change during execution: agents or tasks may appear or disappear, and policies that were optimal moments earlier may no longer apply. Environments then are \emph{unbounded} in the quantity and composition of agents and tasks which we, agents, act with. Practical MARL methods must therefore adapt their policies to these unbounded changes without retraining.
+
+
+%This paragraph might be completely deleted.
+%Current state-of-the-art MARL approaches, such as QMIX \cite{rashid2020monotonic}, COMA \cite{foerster2018counterfactual_coma}, and MAPPO \cite{ppo, mappo} are effective in closed settings but encounter significant limitations with AO and TO. Without explicit workarounds, these methods simply fail when faced with openness in the environment. With workarounds such as padding and masking, they can be trained, but this introduces artificial upper bounds, architectural complexity, and sample inefficiency. Moreover, because openness alters the environment during both training and execution, these methods (designed for fixed configurations) cannot sustain effective performance. Furthermore, transformers \cite{vaswani2017attention}, in theory, are capable of handling variable input sizes; but in practice, they also require fixed upper bounds, extensive padding, and masking to enable efficient batch processing. These requirements undermine their flexibility, and transformers remain fundamentally limited in their ability to handle unbounded numbers of agents or tasks. This reliance fundamentally limits generalization: a model trained with fixed, padded configurations cannot seamlessly adapt to new degrees of openness without retraining or reconfiguration. As a result, current approaches remain inherently dependent on anticipating or artificially constraining the number of agents, tasks, or agent frames as the result preventing them from achieving unbounded openness.
+
+%Such reliance on padding and masking mechanisms fundamentally limits generalization under openness. A model trained with fixed, padded configurations cannot seamlessly adapt to scenarios involving a different degree of openness without retraining or reconfiguration. As a result, current approaches remain inherently dependent on anticipating or artificially constraining the number of agents, tasks, or agent frames, which prevents them from achieving true, unbounded openness.
+
+
+A few notable MARL approaches attempt to address facets of openness in MAS but none has addressed AO and TO jointly without limitations.  For example, \textbf{MOHITO}~\cite{anilmohito} explicitly targets \textit{task openness} under TaO-MG; while its interaction hypergraph is expressive enough to represent AO, MOHITO does not explicitly model or evaluate handling stochastic AO. \textbf{Deep Implicit Coordination Graphs (DICG)}~\cite{dicg}, though not explicitly designed for openness, introduce flexible coordination structures that provide limited support for AO and TO but still operate within bounded and padded inputs. \textbf{Graph convolutional reinforcement learning (DGN)}~\cite{dgn} performs coordination by graph convolutions over an agent graph and can, in principle, accommodate changing agent neighborhoods, but it is not designed to model task openness and assumes a fixed action set and agent-centric graph structure.  
+Taken together, these methods represent important progress, yet each addresses only one dimension of openness and remain constrained by strong assumptions such as semantics, or rely on bounded, padded representations that impose hard limits on the agent–task space. 
+
+%GPL is not MARL, and we dont have it in the evaluation.
+%\textbf{Graph-based Policy Learning (GPL)}~\cite{gpl}, designed for open ad hoc teamwork, focuses on \textit{agent openness} by allowing a single adaptive agent to adjust to changing teammates. However, it assumes that all other agents follow fixed pre-trained or heuristic policies and depends on padding where inputs are expanded to a fixed size with dummy elements, forming a fixed-length embedding of all fixed-policy teammates that is stacked into a fixed-size matrix before policy computation, which forces a predefined maximum team size and bounded environments
+
+
+We address these challenges with \textbf{Pointer Learner for Agent and Task Openness}, namely \textbf{PLATO}, an actor-critic MARL algorithm with centralized training and decentralized execution (CTDE) \cite{lowe2017multi}. PLATO uses a pointer network-based \cite{ptr} actor with a centralized graph neural network (GNN) \cite{gnn} critic, and we train it with multi-agent proximal policy optimization (MAPPO) \cite{mappo}.
+PLATO handles TO and AO by learning a content-based pointing policy--inspired by pointer networks \cite{ptr}--in which agents point to tasks via query–key attention over only the currently available tasks, so the action distribution adapts as agents or tasks enter and leave without retraining or bounding.
+
+
+%PLATO’s actor preprocesses the available actions at each timestep into input representations (“points”) that incorporate both the current task set and the team composition. The actor is parameter-shared across all agents such that  when a new agent enters, it can immediately participate using the same policy. This design enables the network to reason jointly about agent and task dynamics, integrating new agents or tasks seamlessly as they appear. The GNN centralized critic complements the actor by evaluating the resulting agent–task graph, providing stable learning signals under these open conditions. By operating directly on the current system state rather than padded input, PLATO supports AO and TO jointly with greater efficiency and generalization than prior methods.
+
+%TODO - we need better accurate contributions based on the results.
+
+The main contributions of this work are: (1) PLATO, the first MARL architecture that explicitly handles agent and task openness via content-based pointing, without padding, bounding, or retraining; (2) a formal \emph{joint agent-and-task open Markov game setting (TaAgO-MG)} that captures simultaneous changes in the agent set and task set, underlying the PLATO algorithm; (3) an  \emph{evaluation of PLATO's performance and action efficiency} across AO/TO setups and grid sizes in a challenging wildfire domain, comparing PLATO against smart and heuristic baselines; and (4) an \emph{assessment of PLATO's generalizability} by executing trained policies on unseen grid sizes without retraining (zero-shot).
+
+    %\item We evaluate performance and efficiency under openness, and zero-shot generalization to an unseen $4\times 4$ grid against three smart and four naive baselines.
+    %\item We discuss \emph{padding and bounding} as a method for baselining openness techniques and provide padded extensions of SOTA agent open techniques, DGN and DICG, extending them to a limited form of task openness.
+    
+    %this is incorrect grammar, and not a independent constribution from the next one.
+    %Using a complex domain as in wildfire fighting, we investigate PLATO under openness, analyzing its performance and identifying the contributions of its key components to handling AO and TO effectively. 
+    %\item We rigorously evaluate PLATO using the MOASEI wildfire domain \cite{patino2025inaugural}, comparing with domain-specific policies and \emph{padding and bounding} methods.
+    %We provide a comprehensive empirical evaluation, comparing PLATO against both naive baselines (e.g., state-of-the-art MARL algorithms adapted with padding) and smart openness-aware baselines that address only one dimension of openness, showing PLATO’s superior performance and generalization. 
+%\end{itemize}
+
+
+
+% In the following, Section 2 reviews background on open multi-agent systems (OASYS), Markov games and their open extensions, pointer networks, and graph neural networks (GNNs). Section 3 formalizes the open agent–task setting used in our study. Section 4 introduces our method, PLATO, which integrates a pointer network–based actor and a GNN critic within the CTDE/MAPPO framework. Section 5 details the experimental setup, domains, baselines, and metrics, and reports results. Section 6 presents ablations of our work. Section 7 discusses the related works and Section 8 discusses the limitations of our current design and concludes with directions for future work.
+
+
+
+
+
+
+
+%Pointer networks \cite{ptr} are sequence models that use an attention mechanism to select an element from an input set, naturally supporting variable-sized action or observation spaces. 
+
+
+%The main contributions of this work are as follows:
+%\begin{itemize}
+%    \item We adapt a novel pointer network-based actor architecture for open MARL that directly addresses two types of openness (AO, TO) without requiring masking, fixed-size inputs, or retraining when the environment changes.
+%    \item We demonstrate, for the first time, that pointer networks can be extended from supervised, single-agent architectures to fully cooperative multi-agent settings under openness, enabling natural scaling to unbounded openness. 
+%    \item We evaluate our approach in the MOASEI free-range-zoo wildfire suppression environment \cite{patino2025inaugural}, an environment specifically designed for Openness. 
+%\end{itemize}

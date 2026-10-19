@@ -1,0 +1,188 @@
+We evaluate PLATO on a Wildfire domain against three smart baselines and four naive heuristic-based baselines under different TO and AO configurations. We first define the configurations and summarize the methods, metrics, and training and evaluation protocols (Section~\ref{sub:experiments}). We then report our investigations on  $3\times 3$ grids under setups S0--S3: performance  (Section~\ref{sub:performance}), efficiency (Section~\ref{sub:efficiency}), and generalizability via zero-shot evaluation on an unseen $4\times 4$ grid (Section~\ref{sub:generalizability}). Domain illustrations, additional $2\times 3$ and $4\times 4$ in-domain results for all reported metrics, and zero-shot results for additional grid combinations are provided in Appendix A.1 and A.9 respectively.
+
+%$2\times 3$ and
+
+% =========================================
+% 5.1 Experiments
+% =========================================
+\subsection{Experiments}\label{sub:experiments}
+%(see Section~\ref{subsec:wildfire})
+\paragraph{Domain.}\label{sec:to_ao_settings}  
+We use the \textsc{Wildfire} domain \cite{patino2025inaugural}. A grid size $r\times c$ denotes $r$ rows and $c$ columns, for a total of $rc$ cells.
+Agents are assigned to cells (no movement), and each fire (task) is associated with a cell.
+Increasing the grid size expands the task location set and alters which fires fall within each agent's suppression range, thereby changing the coordination demands. Each agent carries a finite amount of \emph{suppressant}, which is consumed when suppressing fires. When depleted, the agent exits and re-enters with a stochastic \emph{refill success probability}, inducing AO. Fires have discrete \emph{sizes}; larger fires require more agents and suppression and incur larger burnout penalties if they reach terminal intensity. 
+\emph{Endogenous TO } is induced by fire \emph{spread}, where existing fires probabilistically ignite neighboring cells, while \emph{exogenous TO} is induced by \emph{random ignitions} that introduce new fires independently of tasks or agents.
+At each step, agents may suppress an in-range fire or select \textsc{no-op}.
+Rewards are additive over time and balance positive rewards for \emph{putouts} (fires extinguished) against penalties for \emph{burnouts} (fires reaching terminal intensity).
+In our experiments, we use a base reward $b=2$: putting out a fire with size $s$ yields $2^{s}$, while a burnout  yields $-2^{s}$.
+
+
+\paragraph{Openness setups (S0--S3).}
+
+
+
+Table~\ref{tab:setup_summary} summarizes our  openness setups, with increasing challenges from S0 to S3.  
+S0 is closed: no new fires appear, agents have unlimited suppressant, and each episode ends once all its fires are extinguished.
+S1 enables fire spread (endogenous TO) with refill success $=1$.
+S2 adds random ignitions (exogenous TO) with refill success $<1$.
+S3 combines spread and ignitions with AO via lower refill success. 
+Setup figures are in Appendix A.2. Within a fixed 100-step horizon, openness events occur frequently in S1--S3 across all grid sizes: agents often deplete suppressant and temporarily exit (AO), and new fires appear due to spread and/or random ignitions (TO), with substantially higher counts than S0. The event frequencies by setup and grid, along with per-grid configuration parameters, contributing to different degrees of AO and TO, are reported in Appendix A.3. For complete details on the different configuration parameters across grid sizes, see Appendix A.4.
+
+
+\begin{table} [h]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+
+\begin{tabular}{lccc}
+\toprule
+\textbf{Setup} & \textbf{Fire spread} & \textbf{Random ignitions} & \textbf{Refill success} \\
+\midrule
+S0 & $\times$ (0.0) & $\times$ (0.0) & - \\
+S1 & $\checkmark$ (0.6) & $\times$ (0.0) & 1.0 \\
+S2 & $\times$ (0.0) & $\checkmark$ (0.6) & 0.8 \\
+S3 & $\checkmark$ (0.6) & $\checkmark$ (0.6) & 0.6 \\
+\bottomrule
+\end{tabular}
+\caption{Configuration: Openness mechanisms across setups. Endogenous TO is fire spread, exogenous TO is random ignitions, and AO is stochastic refill success. Numbers indicate the probability per step. Note that in S0 agents have unlimited suppressant}
+\label{tab:setup_summary}
+\end{table}
+
+
+
+
+\paragraph{Models and baselines.}\label{sec:models_metrics} 
+Our method is \textbf{PLATO}, defined as the shared pointer-network actor with an MLP encoder-decoder architecture and additive attention. We use three smart baselines that are strong approaches for coordination under partial forms of openness: \textbf{DGN}~\cite{dgn} and \textbf{DICG}~\cite{dicg} represent state-of-the-art MARL methods for dynamic coordination but assume a fixed set of agents and tasks during training; and \textbf{MOHITO}~\cite{anilmohito} is the closest prior method explicitly designed for TO.  We also use four naive baselines to contextualize gains from coordination versus simple rule-based behavior: \textbf{NOOP} always selects no-action, providing a lower bound; \textbf{Random} samples uniformly from available actions; \textbf{Strongest} prioritizes the highest-intensity fires, representing an urgency-driven heuristic; and \textbf{Weakest} prioritizes the lowest-intensity fires, reflecting an immediacy-driven strategy.
+
+\paragraph{Metrics.} 
+We evaluate policies performance using \textbf{episode return (execution average reward per episode)} and policies efficiency using \textbf{reward per fight action}. In training and evaluation, we seed each episode randomly.  Also, tables report mean $\pm$ std over 150 evaluation episodes (50 seeds per checkpoint, 3 checkpoints per method) per setup on each configuration. Bold entries are statistically significant under a one-sided paired $t$-test~\cite{student1908probable} with Bonferroni correction~\cite{hochberg1987multiple} ($\alpha{=}0.05/k$, $k$ models per table); bold cells also report the minimum Cohen's $d_z$~\cite{cohen1988statistical} effect size over all competitors. Full derivations and family definitions ($k{=}8$ main $2{\times}3$/$3{\times}3$, $k{=}4$ main $4{\times}4$ and zero-shot, $k{=}6$ ablation) are in Appendix~\ref{sec:convergence_appendix}. Training, validation, and evaluation seeds are drawn from disjoint ranges; see Appendix~\ref{app:random_seed} for details.
+
+%We therefore report results aggregated over many independent evaluation episodes and apply the same checkpoint-selection procedure to all methods.  
+
+
+
+\subsection{Performance}\label{sub:performance}
+As shown in Table 2, under openness, PLATO achieves the highest return in S2 and S3 with statistical significance, while remaining comparable to the top-performing baselines in S1. In S0 with no openness, PLATO performs as well as all top-performing baselines. MOHITO now converges competitively in S3 but still lags in S1--S2.
+
+
+%Under openness, PLATO matches the best return in S1 and achieves the highest return in S2 with statistical significance (Table~\ref{tab:reward_3x3}). In S3, DGN achieves the highest return. Overall, PLATO is strongest in S2 and remains competitive in S1--S3 relative to the other methods. 
+%In the closed setup (S0), the best naive baselines match the best smart baselines, consistent with the fixed initial fires being fully extinguishable by simple heuristics. See Appendix A.9 for more detailed discussions.
+
+%As expected because S1--S3 induce frequent ignitions and zero-suppressant exits, so many suppression actions are low-value unless they can finish a putout before a costly $-2^{s}$ burnout; PLATO’s higher reward per fight action in S1--S3 (Table~\ref{tab:rpf_3x3}) indicates more selective, higher-yield suppression. In contrast, the smart baselines show low or negative reward per fight action under openness (e.g., MOHITO drops to $-0.74$ in $3\times 3$ S3), consistent with less coordinated (or most wasteful) suppression effots and burnout-driven return collapse when TO and AO are combined.
+% -----------------------
+% Reward (3x3 only, main) [UPDATED]
+% -----------------------
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{$3\times 3$} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+PLATO & 8.00$\pm$0.00 & 7.68$\pm$1.36 & \textbf{115.44$\pm$10.82} & \textbf{81.76$\pm$19.20} \\
+DICG & 8.00$\pm$0.00 & 6.00$\pm$2.71 & 61.44$\pm$13.41 & 42.72$\pm$16.94 \\
+DGN & 7.76$\pm$0.96 & 5.60$\pm$2.68 & 45.08$\pm$16.07 & 32.88$\pm$15.21 \\
+MOHITO & 8.00$\pm$0.00 & 4.32$\pm$3.01 & 48.32$\pm$20.18 & 51.40$\pm$16.99 \\
+NOOP & -8.00$\pm$0.00 & -8.00$\pm$0.00 & -12.00$\pm$0.00 & -12.00$\pm$0.00 \\
+Random & 6.00$\pm$2.46 & 4.48$\pm$3.49 & 11.48$\pm$16.06 & 0.88$\pm$12.96 \\
+Weakest & 8.00$\pm$0.00 & 7.76$\pm$0.96 & 70.36$\pm$22.66 & 37.44$\pm$1.72 \\
+Strongest & 8.00$\pm$0.00 & 7.28$\pm$1.75 & 24.24$\pm$29.13 & 13.92$\pm$20.38 \\
+
+\bottomrule
+\end{tabular}
+\caption{Performance: Episode return (mean $\pm$ std) on the $3\times 3$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:reward_3x3}
+\end{table}
+
+
+
+
+% =========================================
+% 5.3 Efficiency
+% =========================================
+As shown in Table~\ref{tab:rpf_3x3}, PLATO attains the highest reward per fight (i.e., efficiency) with statistical significance in S0, S2, and S3, whereas S1 is led by the \textbf{Weakest} heuristic. Across methods, reward per fight is generally lower under higher openness (S2, S3) than in S0/S1, and PLATO remains positive across S0--S3 in its efficiency.
+%We further analyze efficiency using reward per fight action (Table~\ref{tab:rpf_3x3}), i.e., reward obtained per suppression attempt. Across setups, PLATO attains the highest reward per fight in S1 and S2 with statistical significance. In S3, reward per fight is similar among the top methods (DGN/DICG/PLATO). For most methods, reward per fight is lower in S2/S3 than in S0/S1. PLATO remains positive across S0--S3. More supporting results are in Appendix A.9. Note also that reward per fight action generally decreases under higher openness (S2, S3) as suppressant scarcity and coordination demands increase. 
+%PLATO's ability to maintain a positive reward per fight action also shows its robustness in handling openness.  
+% -----------------------
+% Reward per Fight (3x3 only, main) [UPDATED]
+% -----------------------
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{l|l|l|l|l}
+\toprule
+\multicolumn{5}{c}{Reward per Fight ($3\times 3$)} \\
+\midrule
+Model & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+
+PLATO & \textbf{1.30$\pm$0.23} & 0.55$\pm$0.39 & \textbf{0.77$\pm$0.07} & \textbf{0.65$\pm$0.09} \\
+DICG & 0.48$\pm$0.35 & 0.33$\pm$0.21 & 0.47$\pm$0.08 & 0.39$\pm$0.16 \\
+DGN & 0.69$\pm$0.39 & 0.50$\pm$0.48 & 0.39$\pm$0.10 & 0.33$\pm$0.14 \\
+MOHITO & 0.89$\pm$0.00 & 0.34$\pm$0.37 & 0.34$\pm$0.32 & 0.42$\pm$0.12 \\
+NOOP & -8.00$\pm$0.00 & -8.00$\pm$0.00 & -12.00$\pm$0.00 & -12.00$\pm$0.00 \\
+Random & 0.73$\pm$0.36 & 0.38$\pm$0.39 & 0.03$\pm$0.49 & -0.22$\pm$0.47 \\
+Weakest & 1.03$\pm$0.13 & \textbf{0.87$\pm$0.44} & 0.48$\pm$0.07 & 0.35$\pm$0.02 \\
+Strongest & 1.03$\pm$0.13 & 0.71$\pm$0.57 & -0.10$\pm$0.62 & -0.16$\pm$0.57 \\
+
+\bottomrule
+\end{tabular}
+\caption{Efficiency: Reward per fight (mean $\pm$ std) on the $3\times 3$ grid. Bold indicates statistically significant best performance within each setup (one-sided paired $t$-test; $\alpha=0.00625$).}
+\label{tab:rpf_3x3}
+\end{table}
+
+
+
+
+% =========================================
+% 5.4 Generalizability
+% =========================================
+\subsection{Generalizability}\label{sub:generalizability}
+Robustness to the nonstationary environment is the most important challenge in openness as just one more agent or task may appear which changes the optimal strategy. Theoretically, we show in, Thm. \ref{theorem:well-defined}, that PLATO's actor and critic are well defined functions over an unbounded state space. Empirically, we evaluate generalization by executing policies trained on $3\times 3$ directly on an unseen $4\times 4$ grid without further training. Table~\ref{tab:cross_4x4_reward_3x3} shows that PLATO and DICG generalize effectively to the unseen grid, while DGN and MOHITO degrade under zero-shot conditions in S1. No method achieves statistical significance in S2--S3; DICG leads S2 and PLATO leads S3 numerically. DGN drops near-zero in S1 and MOHITO turns negative in S1, consistent with sensitivity to changes in agent and task composition, while both recover partially in S2--S3.
+%DICG remains competitive but below PLATO across open setups.
+%on $2\times 3$ or
+%We evaluate generalization by executing policies trained on $3\times 3$ directly on an unseen $4\times 4$ grid without further training. Whereas PLATO supports variable agent and task sets by design, we adapt the other three smart baselines to varying numbers of agents and tasks: DGN and DICG are padded to 30 agents and 30 tasks; MOHITO handles task openness natively but assigns agent-specific policies, so unseen agents receive a randomly sampled trained policy. Across setups, all smart baselines exhibit different zero-shot behavior. PLATO is competitive across S0--S3 and attains the highest mean return in S3 (Table~\ref{tab:cross_4x4_reward_3x3}). Relative to PLATO, DGN degrades substantially in S2 and is negative in S3, while MOHITO and DICG remain strong in S1/S2 but drop in S3. Additional supporting results are in Appendix A.9. %DGN is consistently outperformed (negative in S1--S3 for both training grids); DICG is less stable (e.g., $2\times 3$-trained collapses to $-4.00$ in S3); across all four setups, MOHITO performs relatively similarly with PLATO outperfoming MOHITO in S3. %Under combined openness (S3), all methods suffer with negative rewards. 
+
+ %Note that training grid sizes affect the zero-shot performance as expected, e.g., PLATO trained on $2\times 3$ degrades under openness, while PLATO trained on $3\times 3$ transfers more effectively.
+ 
+%PLATO's pointer actor performs content-based, slot-free selection over the currently available fires conditioned on the current agent set, reducing train-test mismatch when the $4\times 4$ grid changes each agent’s in-range task set. In contrast, padding-based fixed-slot models (i.e., DGN and DICG) and agent-specific policies (i.e., MOHITO) are more sensitive to changes in task composition and agent availability, increasing wasted suppression (see more results in Appendix A.9).
+% -----------------------
+% 4x4: Reward (zero-shot), trained on 3x3 (main)
+% -----------------------
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.03}
+\begin{tabular}{@{}l|c|c|c|c@{}}
+\toprule
+\multicolumn{5}{c}{Trained on $3\times 3$; tested on $4\times 4$} \\
+\midrule
+Model  & \multicolumn{1}{c|}{S0} & \multicolumn{1}{c|}{S1} & \multicolumn{1}{c|}{S2} & \multicolumn{1}{c}{S3} \\
+\midrule
+
+PLATO & 10.00$\pm$2.68 & 5.40$\pm$8.36 & 58.24$\pm$19.84 & 57.72$\pm$17.63 \\
+DICG & 10.40$\pm$1.67 & 8.56$\pm$8.50 & 63.28$\pm$11.83 & 51.60$\pm$14.19 \\
+DGN & 6.96$\pm$4.00 & -0.44$\pm$6.34 & 49.52$\pm$19.37 & 37.48$\pm$27.22 \\
+MOHITO  & \textbf{11.28$\pm$1.88} & -1.28$\pm$7.56 & 42.84$\pm$28.12 & 56.56$\pm$9.85 \\
+
+\bottomrule
+\end{tabular}
+\caption{Generalizability: Episode return on $4\times 4$ under zero-shot evaluation 
+when trained on $3\times 3$ (mean $\pm$ std). Bold indicates statistically significant 
+best performance within each setup (one-sided paired $t$-test; $\alpha=0.0125$).}
+\label{tab:cross_4x4_reward_3x3}
+\end{table}
+
+\subsection{Summary}\label{sub:exp_summary}
+Overall, the results show three main trends. First, PLATO achieves the highest performance in S2 and S3 on the $3\times 3$ grid with statistical significance. Second, PLATO achieves the highest efficiency in S0, S2, and S3, while remaining positive across all setups. Third, under zero-shot transfer to $4\times 4$, PLATO and DICG generalize effectively while DGN and MOHITO collapse in S1; PLATO leads S3 and DICG leads S2 numerically. Additional results are in Appendix~A.9.
+
+%significant separation across methods.

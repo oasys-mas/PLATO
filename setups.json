@@ -1,0 +1,1402 @@
+{
+  "default_values": {
+    "grid_dimensions": {
+      "width": 3,
+      "height": 3
+    },
+    "fire": {
+      "states": 5,
+      "intensity_increase_prob": 0.7,
+      "intensity_decrease_prob": 0.5,
+      "burnout_prob": 0.5,
+      "extra_power_decrease_bonus": 0.15,
+      "cell_size": 200.0,
+      "wind_direction": 0.0,
+      "max_spread_rate": 0.0,
+      "use_fire_fuel": true,
+      "initial_fuel": 10000
+
+    },
+    "agent": {
+      "default_power": 1,
+      "default_range": 1,
+      "default_initial_suppressant": 2,
+      "suppressant_levels": 2,
+      "tank_capacity": 2,
+
+      "0_default_initial_suppressant": 30,
+      "0_suppressant_levels": 30,
+      "0_tank_capacity": 30,
+      "0_possible_capacities": [30.0, 30.0, 30.0],
+      "0_capacity_probabilities": [0.0, 1.0, 0.0],
+
+      "suppressant_decrease_probability": 1.0,
+      "suppressant_refill_probability": 1.0,
+      "tank_switch_probability": 1.0,
+      "critical_error_probability": 0.0,
+      "possible_capacities": [1.0, 2.0, 3.0],
+      "capacity_probabilities": [0.0, 1.0, 0.0]
+    },
+    "reward": {
+      "base_fire_reward": 2.0,
+      "burnout_penalty": 0.0,
+      "burnout_penalty_scaled": true,
+      "bad_attack_penalty": -100.0,
+      "termination_reward": 0.0,
+      "termination_kappa": 0.0
+    }
+,
+    "equipment": {
+      "frame_open_repair_prob": 0.5,
+      "frame_open_degrade_prob": 0.5,
+      "frame_closed_repair_prob": 1.0,
+      "frame_closed_degrade_prob": 1.0
+    }  },
+
+  "equipment_states": {
+    "default": {
+      "initial_state": 2,
+      "states": [
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0]
+      ]
+    }
+  },
+
+  "setups": {
+
+    "setup0_2x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 2
+      },
+            
+      "fires": [
+        {"position": [1, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 1, "ignition_temperature": 1}
+      ],
+
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": false,
+        "suppressant_refill": false,
+        "suppressant_decrease": false,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": false,
+        "fire_decrease": false,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": false
+      }
+    },
+    "setup1_2x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 2
+      },
+            
+      "fires": [
+        {"position": [1, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 1, "ignition_temperature": 1}
+      ],
+
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": true
+      }
+    },
+
+    "setup0_3x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "fires": [
+        {"position": [1, 0], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [2, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [1, 2], "type": 1, "ignition_temperature": 1}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": false,
+        "suppressant_refill": false,
+        "suppressant_decrease": false,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": false,
+        "fire_decrease": false,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": false
+      }
+    },
+
+    "setup1_3x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "fires": [
+        {"position": [1, 0], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [2, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [1, 2], "type": 1, "ignition_temperature": 1}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": true
+      }
+    },
+
+    "setup2_2x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 2
+      },
+      "fires": [
+        {"position": [1, 1], "type": 2, "ignition_temperature": 2},
+        {"position": [0, 1], "type": 1, "ignition_temperature": 1}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 0.8,
+      "base_spread_rate": 0.0,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+      }
+    },
+
+    "setup2_3x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "fires": [
+        {"position": [1, 0], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 2, "ignition_temperature": 2},
+        {"position": [2, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [1, 2], "type": 2, "ignition_temperature": 2}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 0.8,
+      "base_spread_rate": 0.0,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+      }
+    },
+
+    "setup3_2x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 2
+      },
+      "fires": [
+
+        {"position": [1, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [2, 1], "type": 2, "ignition_temperature": 2}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 0], "initial_suppressant": 1, "power": 1, "range": 1},
+        {"position": [2, 0], "initial_suppressant": 0, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 0.6,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+      }
+    },
+
+    "setup3_3x3": {
+      "grid_dimensions": {
+        "width": 3,
+        "height": 3
+      },
+      "fires": [
+        {"position": [1, 0], "type": 1, "ignition_temperature": 1},
+        {"position": [0, 1], "type": 2, "ignition_temperature": 2},
+        {"position": [2, 1], "type": 1, "ignition_temperature": 1},
+        {"position": [1, 2], "type": 2, "ignition_temperature": 2}
+      ],
+      "agent_configs": [
+        {"position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1},
+        {"position": [1, 1], "initial_suppressant": 1, "power": 1, "range": 1},
+        {"position": [2, 2], "initial_suppressant": 0, "power": 1, "range": 1}
+      ],
+      "suppressant_refill_probability": 0.6,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+      }
+    },
+
+
+    "setup0_4x4": {
+      "grid_dimensions": { "width": 4, "height": 4 },
+
+      "fires": [
+        { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+        { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 3], "type": 1, "ignition_temperature": 1 }
+      ],
+
+      "agent_configs": [
+        { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [0, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+      ],
+
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": false,
+        "suppressant_refill": false,
+        "suppressant_decrease": false,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": false,
+        "fire_decrease": false,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": false
+          }
+        },
+    "setup1_4x4": {
+      "grid_dimensions": { "width": 4, "height": 4 },
+
+      "fires": [
+        { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+        { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 3], "type": 1, "ignition_temperature": 1 }
+      ],
+
+      "agent_configs": [
+        { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [0, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+      ],
+
+      "suppressant_refill_probability": 1.0,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.0,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": false,
+        "fire_fuel": true
+          }
+        },
+    "setup2_4x4": {
+      "grid_dimensions": { "width": 4, "height": 4 },
+
+      "fires": [
+        { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+        { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+        { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 2], "type": 2, "ignition_temperature": 2 },
+        { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 3], "type": 1, "ignition_temperature": 1 }
+      ],
+
+      "agent_configs": [
+        { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [0, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+      ],
+      "suppressant_refill_probability": 0.8,
+      "base_spread_rate": 0.0,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": false,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+          }
+        },
+
+    "setup3_4x4": {
+      "grid_dimensions": { "width": 4, "height": 4 },
+
+      "fires": [
+        { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+        { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+        { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 2], "type": 2, "ignition_temperature": 2 },
+        { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+        { "position": [1, 3], "type": 2, "ignition_temperature": 2 }
+      ],
+
+      "agent_configs": [
+        { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [3, 0], "initial_suppressant": 1, "power": 1, "range": 1 },
+        { "position": [1, 1], "initial_suppressant": 0, "power": 1, "range": 1 },
+        { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+        { "position": [0, 3], "initial_suppressant": 1, "power": 1, "range": 1 },
+        { "position": [3, 3], "initial_suppressant": 0, "power": 1, "range": 1 }
+      ],
+
+
+      "suppressant_refill_probability": 0.6,
+      "base_spread_rate": 0.6,
+      "random_ignition_probability": 0.6,
+      "stochastic_config": {
+        "special_burnout_probability": true,
+        "suppressant_refill": true,
+        "suppressant_decrease": true,
+        "tank_switch": false,
+        "critical_error": false,
+        "fire_increase": true,
+        "fire_decrease": true,
+        "fire_spread": true,
+        "realistic_fire_spread": false,
+        "random_fire_ignition": true,
+        "fire_fuel": true
+      }
+    },
+    
+    "setup0_5x5": {
+        "grid_dimensions": { "width": 5, "height": 5 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 1.0,
+        "base_spread_rate": 0,
+        "random_ignition_probability": 0.0,
+        "stochastic_config": {
+            "special_burnout_probability": false,
+            "suppressant_refill": false,
+            "suppressant_decrease": false,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": false,
+            "fire_decrease": false,
+            "fire_spread": false,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": false,
+            "fire_fuel": false
+        }
+    },
+
+    "setup1_5x5": {
+        "grid_dimensions": { "width": 5, "height": 5 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 1.0,
+        "base_spread_rate": 0.6,
+        "random_ignition_probability": 0.0,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": true,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": false,
+            "fire_fuel": true
+        }
+    },
+
+    "setup2_5x5": {
+        "grid_dimensions": { "width": 5, "height": 5 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 0.8,
+        "base_spread_rate": 0.0,
+        "random_ignition_probability": 0.6,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": false,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": true,
+            "fire_fuel": true
+        }
+    },
+
+    "setup3_5x5": {
+        "grid_dimensions": { "width": 5, "height": 5 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [3, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 0.6,
+        "base_spread_rate": 0.6,
+        "random_ignition_probability": 0.6,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": true,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": true,
+            "fire_fuel": true
+        }
+    },
+
+    "setup0_6x6": {
+        "grid_dimensions": { "width": 6, "height": 6 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 5], "type": 2, "ignition_temperature": 2 },
+            { "position": [4, 5], "type": 2, "ignition_temperature": 2 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 5], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 1.0,
+        "base_spread_rate": 0,
+        "random_ignition_probability": 0.0,
+        "stochastic_config": {
+            "special_burnout_probability": false,
+            "suppressant_refill": false,
+            "suppressant_decrease": false,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": false,
+            "fire_decrease": false,
+            "fire_spread": false,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": false,
+            "fire_fuel": false
+        }
+    },
+
+    "setup1_6x6": {
+        "grid_dimensions": { "width": 6, "height": 6 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 5], "type": 2, "ignition_temperature": 2 },
+            { "position": [4, 5], "type": 2, "ignition_temperature": 2 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 5], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 1.0,
+        "base_spread_rate": 0.6,
+        "random_ignition_probability": 0.0,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": true,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": false,
+            "fire_fuel": true
+        }
+    },
+
+    "setup2_6x6": {
+        "grid_dimensions": { "width": 6, "height": 6 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 2, "ignition_temperature": 2 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [5, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 2, "ignition_temperature": 2 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [5, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 5], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 5], "type": 2, "ignition_temperature": 2 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 3], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 5], "initial_suppressant": 2, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 0.8,
+        "base_spread_rate": 0.0,
+        "random_ignition_probability": 0.6,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": false,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": true,
+            "fire_fuel": true
+        }
+    },
+
+    "setup3_6x6": {
+        "grid_dimensions": { "width": 6, "height": 6 },
+        "fires": [
+            { "position": [1, 0], "type": 1, "ignition_temperature": 1 },
+            { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [4, 1], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 2], "type": 2, "ignition_temperature": 2 },
+            { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 3], "type": 1, "ignition_temperature": 1 },
+            { "position": [1, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [3, 4], "type": 1, "ignition_temperature": 1 },
+            { "position": [5, 4], "type": 2, "ignition_temperature": 2 },
+            { "position": [2, 5], "type": 2, "ignition_temperature": 2 },
+            { "position": [4, 5], "type": 2, "ignition_temperature": 2 }
+        ],
+        "agent_configs": [
+            { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [3, 0], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [1, 1], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [5, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [0, 2], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [2, 2], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [4, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [5, 3], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [0, 4], "initial_suppressant": 0, "power": 1, "range": 1 },
+            { "position": [2, 4], "initial_suppressant": 2, "power": 1, "range": 1 },
+            { "position": [4, 4], "initial_suppressant": 1, "power": 1, "range": 1 },
+            { "position": [5, 5], "initial_suppressant": 0, "power": 1, "range": 1 }
+        ],
+        "suppressant_refill_probability": 0.6,
+        "base_spread_rate": 0.6,
+        "random_ignition_probability": 0.6,
+        "stochastic_config": {
+            "special_burnout_probability": true,
+            "suppressant_refill": true,
+            "suppressant_decrease": true,
+            "tank_switch": false,
+            "critical_error": false,
+            "fire_increase": true,
+            "fire_decrease": true,
+            "fire_spread": true,
+            "realistic_fire_spread": false,
+            "random_fire_ignition": true,
+            "fire_fuel": true
+        }
+    },
+
+    "setup0_4x4_zs": {
+    "grid_dimensions": { "width": 4, "height": 4 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 3], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 2], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": false,
+      "suppressant_refill": false,
+      "suppressant_decrease": false,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": false,
+      "fire_decrease": false,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": false
+    }
+  },
+
+  "setup1_4x4_zs": {
+    "grid_dimensions": { "width": 4, "height": 4 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 3], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 2], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": true
+    }
+  },
+
+  "setup2_4x4_zs": {
+    "grid_dimensions": { "width": 4, "height": 4 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 3], "type": 2, "ignition_temperature": 2 },
+      { "position": [3, 3], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 2], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 2], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.8,
+    "base_spread_rate": 0.0,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup3_4x4_zs": {
+    "grid_dimensions": { "width": 4, "height": 4 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [0, 3], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 3], "type": 2, "ignition_temperature": 2 },
+      { "position": [3, 3], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 2], "initial_suppressant": 1, "power": 1, "range": 1 },
+      { "position": [3, 2], "initial_suppressant": 0, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.6,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup0_5x5_zs": {
+    "grid_dimensions": { "width": 5, "height": 5 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 4], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 4], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": false,
+      "suppressant_refill": false,
+      "suppressant_decrease": false,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": false,
+      "fire_decrease": false,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": false
+    }
+  },
+
+  "setup1_5x5_zs": {
+    "grid_dimensions": { "width": 5, "height": 5 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 4], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 4], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": true
+    }
+  },
+
+  "setup2_5x5_zs": {
+    "grid_dimensions": { "width": 5, "height": 5 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 0], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [0, 4], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 4], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 3], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.8,
+    "base_spread_rate": 0.0,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup3_5x5_zs": {
+    "grid_dimensions": { "width": 5, "height": 5 },
+    "fires": [
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 0], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [3, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [4, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [0, 4], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 4], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [1, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [3, 1], "initial_suppressant": 1, "power": 1, "range": 1 },
+      { "position": [2, 3], "initial_suppressant": 0, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.6,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup0_3x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 3 },
+    "fires": [
+      { "position": [0, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 2], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [0, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 1], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": false,
+      "suppressant_refill": false,
+      "suppressant_decrease": false,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": false,
+      "fire_decrease": false,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": false
+    }
+  },
+
+  "setup1_3x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 3 },
+    "fires": [
+      { "position": [0, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 2], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 2], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [0, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 1], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": true
+    }
+  },
+
+  "setup2_3x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 3 },
+    "fires": [
+      { "position": [0, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 0], "type": 2, "ignition_temperature": 2 },
+      { "position": [1, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [0, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 2], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [0, 1], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 1], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.8,
+    "base_spread_rate": 0.0,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup3_3x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 3 },
+    "fires": [
+      { "position": [0, 0], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 0], "type": 2, "ignition_temperature": 2 },
+      { "position": [1, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [0, 2], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 2], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [0, 1], "initial_suppressant": 1, "power": 1, "range": 1 },
+      { "position": [2, 1], "initial_suppressant": 0, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.6,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup0_2x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 2 },
+    "fires": [
+      { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": false,
+      "suppressant_refill": false,
+      "suppressant_decrease": false,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": false,
+      "fire_decrease": false,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": false
+    }
+  },
+
+  "setup1_2x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 2 },
+    "fires": [
+      { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [2, 1], "type": 1, "ignition_temperature": 1 }
+    ],
+    "agent_configs": [
+      { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 1.0,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.0,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": false,
+      "fire_fuel": true
+    }
+  },
+
+  "setup2_2x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 2 },
+    "fires": [
+      { "position": [0, 1], "type": 1, "ignition_temperature": 1 },
+      { "position": [1, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [2, 0], "initial_suppressant": 2, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.8,
+    "base_spread_rate": 0.0,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": false,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  },
+
+  "setup3_2x3_zs": {
+    "grid_dimensions": { "width": 3, "height": 2 },
+    "fires": [
+      { "position": [0, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [1, 1], "type": 2, "ignition_temperature": 2 },
+      { "position": [2, 1], "type": 2, "ignition_temperature": 2 }
+    ],
+    "agent_configs": [
+      { "position": [0, 0], "initial_suppressant": 2, "power": 1, "range": 1 },
+      { "position": [1, 0], "initial_suppressant": 1, "power": 1, "range": 1 },
+      { "position": [2, 0], "initial_suppressant": 0, "power": 1, "range": 1 }
+    ],
+    "suppressant_refill_probability": 0.6,
+    "base_spread_rate": 0.6,
+    "random_ignition_probability": 0.6,
+    "stochastic_config": {
+      "special_burnout_probability": true,
+      "suppressant_refill": true,
+      "suppressant_decrease": true,
+      "tank_switch": false,
+      "critical_error": false,
+      "fire_increase": true,
+      "fire_decrease": true,
+      "fire_spread": true,
+      "realistic_fire_spread": false,
+      "random_fire_ignition": true,
+      "fire_fuel": true
+    }
+  }
+
+}
+}
+
+
+  
+    
+  

@@ -1,0 +1,28 @@
+# PLATO - core runtime dependencies (Python 3.12).
+# For the exact, fully-pinned environment used in the paper see requirements-lock.txt.
+#
+# PyTorch is CUDA-specific. For CUDA 12.4 (as used here) install torch first:
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+# (omit --index-url for the CPU build), then: pip install -r requirements.txt
+
+torch==2.6.0
+torch-geometric==2.7.0
+tensordict==0.7.0
+dgl==2.1.0
+numpy==1.26.4
+scipy==1.16.3
+pandas==2.3.3
+matplotlib==3.10.7
+networkx==3.4.2
+gymnasium==1.0.0
+SuperSuit==3.9.3
+tabulate==0.9.0
+tqdm==4.66.5
+colorama==0.4.6
+dataset==2.0.0
+SQLAlchemy==2.0.49
+psycopg2-binary==2.9.12
+torchvision==0.21.0
+
+# Wildfire environment (pinned to the exact commit used)
+-e git+https://github.com/oasys-mas/dev-free-range-zoo@dd1b3065d16d5ffb86aca25ec45a6d9daf6ca78d#egg=free_range_zoo

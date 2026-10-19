@@ -1,0 +1,12 @@
+
+%A place holder. not ready yet.
+Open agent systems require policies that remain well-defined as both the active agent set and the task set change online. We introduced \textbf{PLATO}, an approach that addresses this challenge by combining (i) a pointer-network actor that outputs a distribution directly over the \emph{current} task set, conditioned on a permutation-invariant summary of the current team, and (ii) a centralized GNN critic that evaluates open global states via a bipartite agent--task graph whose structure changes with system composition. PLATO's design avoids fixed action indexing, padding-based bounds, and retraining to accommodate new tasks or changing team size.
+
+Across wildfire configurations with different types of openness (i.e., endogenous and exogenous TO and temporary AO), PLATO achieves a superior performance relative to smart and naive baselines on seen grids and shows superior zero-shot to an unseen larger grid. Our ablation studies show that learned additive compatibility in the pointer scorer is essential under openness, and that temporal memory provides gains over the additive design only in the hardest settings.
+
+
+We plan to (1) extend TaAgO-MG and the pointer interface to support tasks with multiple actions (i.e., per-task action sets) (e.g., by pointing to task--action pairs or via hierarchical task-then-action selection to extend the encoding mechanism), to address the one-action-per-task limitation of our current TaAgO-MG; (2) relax the full observability of tasks and agents assumption to study partially observable variants with latent-state or belief-based extensions; and (3) consider additional domains outlined in \cite{aimag_eck} and frame openness to further evaluate and improve PLATO.
+
+
+
+%A current limitation is that our task interface assumes a single task-associated action and relies on the availability of task features at execution time. Future work includes extending the pointer mechanism to richer per-task action spaces, addressing frame openness, and scaling evaluations to larger and more heterogeneous open environments.

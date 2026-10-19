@@ -1,0 +1,75 @@
+In this section, we define the \textbf{Task–Agent-Open Markov Game (TaAgO-MG)}, an extension of TaO-MG (see Section 2.2), to consider both AO and TO.  Since both the task set and the agent set may change over time, the feasibility and utility of each task-action depend on the current tasks and team composition. Thus, a practical policy should evaluate the currently available tasks and the current team context, rather than assume fixed action labels with permanent meaning. 
+
+In the following, we instantiate the Markov game using the popular wildfire suppression domain \cite{Chandrasekaran,Kakarlapudi22,anilmohito,eck2020scalable,patino2025inaugural} that exhibits both TO and AO.  Briefly,  the environment is a grid where firefighter agents are stationed in fixed positions and each fire is a task with a location and size \cite{patino2025inaugural}. Fires may ignite (e.g., from lightning or spread), burn out, or become extinguished by firefighters, changing the set of active tasks and creating \emph{task openness}. At each timestep, an agent chooses to either fight a fire or remain idle (\textsc{no-op}); it may also exit the environment when out of suppressant, creating \emph{agent openness}. Rewards also vary: larger fires are more challenging and rewarding, new fires create suppression opportunities, while burnouts and spread alter potential gains and losses.
+%In open agent systems, the set of agents and the set of tasks are not fixed.  For example, in wildfire suppression, both change dynamically over time: new ignitions emerge, existing fires spread or extinguish, and firefighting agents may join, leave, or be redeployed due to supressant recharge or repairs. Such changes invalidate conventional fixed-policy assumptions, in reinforcement learning, and require continual adaptation.
+
+%Tasks may arise from exogenous events (e.g., lightning strikes creating new ignitions) or endogenous actions (e.g., controlled burns by crews). Likewise, agent availability may change due to exogenous factors (e.g., equipment failure) or endogenous choices (e.g., reallocating resources). Formally, the environment can be described as $X = \langle T^\tau, T^\omega, A^\tau, A^\omega \rangle$, where $T^\tau$ and $A^\tau$ capture exogenous dynamics and $T^\omega$ and $A^\omega$ capture endogenous ones. This highlights the need for architectures that operate reliably under dynamic and unpredictable conditions.
+
+
+
+%\subsection{Wildfire Suppression}
+%\label{subsec:wildfire}
+
+%We simulate \emph{task openness} and \emph{agent openness} using the domain of wildfire suppression.
+%TODO - LOOK at Daniel's Comments
+%\begin{figure}[htbp]
+%  \centering
+%  \includegraphics[width=\linewidth]{figs/wildfire_1.png}
+%  \caption{ \textsc{Wildfire} example (3x3). Fires (tasks $X_j$) ignite, spread, burn out, or getting put out (i.e., extinguished) while agents ($N_i$) deplete suppressant or leave for repairs. Both sets evolve over time, creating an open multi-agent system.}
+%  \label{fig:wildfire}
+%\end{figure}
+%Each firefighter, $n_i$, has a suppression range, a finite suppressant level, and equipment health. Agents cannot move between cells; they act only on fires within range. When agent $i$ depletes its suppressant, it exits to recharge suppressant or repair its equipment and may later return, introducing \emph{agent openness}. 
+
+
+
+%\subsection{Markov Games for Openness}\label{TaAgO-MG}
+
+% Here we define a Markov game for reasoning with and addressing openness in agent systems.  Our definition extends MOHITO \cite{anilmohito}, that introduced the \emph{Task-Open Markov Game (TaO-MG)}. A TaO-MG augments the Markov game (see Sec. \ref{sec:markovgames}) with a dynamic task set $X$ and an update function $\Psi$ that modifies the state, action, transition, and reward functions whenever tasks appear or disappear. This allows agents to learn policies that adapt to the evolving set of tasks during execution. 
+
+
+
+%Because these changes induce online updates to each agent’s available task-actions, a practical policy must score the %currently available tasks by their features rather than relying on a fixed, index-based action parametrization.
+
+Consider:
+\[
+\text{TaAgO-MG} \triangleq \langle M, X, N, \Psi \rangle,
+\]
+where $N$ and $X$ are the changing sets of agents and tasks, respectively, rather than a fixed set. We extend the generator, $\Psi$ from MOHITO \cite{anilmohito} to also cover $N$.  Specifically, we treat $\Psi$ as a generator that takes the base game $M$ and the current open sets $(X^t,N^t)$ and returns the time-indexed game, i.e., $M^t := \Psi(M, X^t, N^t)$.  This lets us account for arbitrary deterministic change which new agents entail for the game. Formally the generator is defined as
+%We define the generator function $\Psi:N\times X$ for each component,  $(\Psi_S, \Psi_A, \Psi_T, \Psi_R)$. By extending TaO-MGs in this way, TaAgO-MGs provide a unified framework for modeling environments that exhibit both task and agent openness.
+% $$
+% \begin{aligned}
+%     &M^t = \Psi(N^t,X^t)\\
+%     &\qquad S^t =\Psi_S(N_t,X_t)\\
+%      &\qquad A^t =\Psi_S(N_t,X_t)\\
+%       &\qquad T^t =\Psi_S(N_t,X_t)\\
+%        &\qquad R^t =\Psi_S(N_t,X_t)\\
+% \end{aligned}
+% $$
+%\[
+%M^t
+%=
+%\langle
+%    \Psi_S(M,X^t,N^t),\ 
+%    \Psi_A(M,X^t,N^t),\ 
+%    \Psi_T(M,X^t,N^t),\ 
+%    \Psi_R(M,X^t,N^t)
+%\rangle,
+%\]
+$$
+M^t=\big\langle \Psi_S(M,X^t,N^t),\Psi_A(M,X^t,N^t),\Psi_T(M,X^t,N^t),\Psi_R(M,X^t,N^t)\big\rangle .
+$$
+$\Psi_S$ updates the state, $\Psi_A$ updates the action set, 
+$\Psi_T$ generates the transition function, and $\Psi_R$ generates the reward functions.
+%$\Psi_T$ updates the task set, and $\Psi_R$ updates the reward function. 
+This decomposition allows the environment to update all components when the task set or agent set changes.  Now, let $A_i^t$ denote the action space of agent $n_i$ at time $t$, and let \textsf{suppress}$(x)$ denote the action of suppressing fire $x \in X^t$. (Note that in our wildfire instantiation, each task has one action, so selecting a task uniquely determines the non-\textsc{no-op} action.)
+
+\paragraph*{Task arrival.}
+If a new fire appears at time $t$, $X^{t+1} = X^t \cup \{x_{\text{new}}\}$.  The generator induces the action update, $A_{i}^{t+1} = A_{i}^t
+\cup
+\{\textsf{suppress}(x_{\text{new}})\},
+\qquad \forall n_i \in N^t$, corresponding to $\Psi_A(M,X^{t+1},N^t)$.
+
+\paragraph*{Agent departure.}
+If agent $n_i$ depletes its suppressant and exits, $N^{t+1} = N^t \setminus \{n_i\}$.  The generator produces the updated game components: 
+$S^{t+1} = S^t \setminus \{n_i\}$ and $R^{t+1} := \{R_j^{t}\}_{n_j \in N^{t+1}}$, which correspond to $\Psi_S(M,X^{t+1},N^{t+1})$ and
+$\Psi_R(M,X^{t+1},N^{t+1})$, respectively.
